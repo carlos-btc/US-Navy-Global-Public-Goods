@@ -326,6 +326,7 @@ Appendix C: Chokepoint Descriptive Statistics
 * Random seeds are fixed where applicable.
 * No stochastic elements affect deterministic shortest-path results.
 * All figures in the presentation and paper can be regenerated from scripts in numerical order.
+* Once everything is generated inside your staging area, you need to copy stuff to the main folders and compile the .tex files to create the presentation and the main paper.
 
 Week 9 peer reviewers should be able to:
 
