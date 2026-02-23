@@ -162,13 +162,15 @@ pip install -r requirements.txt
 
 ## 6. Configuration
 
-All file paths and chokepoint parameters are defined in:
+All file paths are hard-coded to the current structure starting as root from _Staging&code/
+
+The network and chokepoint parameters are defined in:
 
 ```
 config.yaml
 ```
 
-Edit this file to:
+In the future we will add ways to edit this file to:
 
 * Set raster file location
 * Modify chokepoint bounding boxes
