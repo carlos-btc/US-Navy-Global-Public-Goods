@@ -1,2 +1,132 @@
 % If you want to compile this section only, make sure to include relevant document headers and the \being \end document commands.
 % You can make this a bit easier if you use the subfile package
+
+%Results
+\subsection{Baseline Shipping Density}
+
+Figure~\ref{fig:global_quicklook} displays the global AIS ship-density raster on a log scale. The distribution of shipping activity is extremely right-skewed: the median cell value is zero, the 90th percentile is approximately 1 AIS position, while the 99th percentile reaches approximately 8.6 million and the maximum cell intensity exceeds 50.6 million positions. This extreme skewness reflects the fundamental geographic concentration of maritime trade: the vast majority of the ocean surface carries negligible traffic, while a small fraction of cells---corresponding to established sea lanes, port approaches, and chokepoint corridors---concentrate virtually all shipping activity.
+
+The global density map reveals several well-known features of maritime geography. The densest corridors connect East Asia to Europe via the Suez Canal and Strait of Malacca, East Asia to North America via the Pacific, and Northern Europe to the Americas across the North Atlantic. Within each major corridor, traffic funnels sharply at chokepoints, producing localized intensity spikes that are visible even at global scale. Port clusters in Northern Europe, East Asia, and the U.S. Gulf Coast also appear as high-density regions.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/global_quicklook.png}
+\caption{Global AIS ship-density raster (log scale). Data from the IMF World Seaborne Trade Monitoring System \citep{cerdeiro2020wstms}, aggregating vessel position reports from January 2015 to February 2021. The raster has been downsampled to $3600 \times 1800$ pixels for visualization.}
+\label{fig:global_quicklook}
+\end{figure}
+
+\subsection{Chokepoint Traffic Intensity}
+
+Rather than presenting the full intensity table in the main text (see Appendix~C for the complete descriptive statistics), we focus on the Suez Canal as a worked example to illustrate the AIS density patterns at a major chokepoint. This focus is motivated by the Suez Canal's central role in global trade---connecting the Mediterranean and Indian Ocean basins---and its historical vulnerability to disruption, most recently demonstrated by the 2021 Ever Given grounding \citep{cariou2021ais}.
+
+Figure~\ref{fig:suez_detail} shows the AIS density at the Suez Canal in detail. Traffic concentrates along the canal itself and its approach channels from Port Said in the north and Suez in the south. The density drops sharply outside the canal corridor, confirming that the bounding box captures the full extent of the navigable passage.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{Figures/suez_intensity_detail.png}
+\caption{AIS ship density at the Suez Canal (log scale). The bounding box ($[32.2, 32.65] \times [29.8, 31.3]$) captures the full navigable corridor including approach channels.}
+\label{fig:suez_detail}
+\end{figure}
+
+Figure~\ref{fig:suez_stats} provides a four-panel descriptive analysis of the Suez Canal density data. Panel~(a) shows the spatial distribution of traffic within the bounding box. Panel~(b) displays the cell-level intensity histogram, confirming extreme right-skewness. Panel~(c) compares mean and 99th-percentile intensity across all six chokepoints, highlighting that Gibraltar and the Bosporus exhibit the highest per-cell intensity despite smaller total throughput. Panel~(d) summarizes the key statistics for the Suez Canal.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/suez_density_stats.png}
+\caption{Descriptive statistics of AIS density at the Suez Canal. (a)~Spatial intensity map. (b)~Cell-level intensity histogram. (c)~Comparison of mean and P99 intensity across all chokepoints. (d)~Summary statistics. Full chokepoint-by-chokepoint analysis in Appendix~C.}
+\label{fig:suez_stats}
+\end{figure}
+
+Across all six chokepoints, the traffic intensity ranking reveals several notable patterns. The Strait of Malacca dominates in total summed intensity, consistent with its role as the primary corridor for Asia--Europe trade \citep{verschuur2023systemic}. An important distinction emerges between total and concentrated intensity: Gibraltar and the Bosporus have among the highest per-cell intensities and 99th-percentile values, indicating extremely concentrated traffic through narrow passages. These patterns are consistent with the physical geography of narrow straits compressing traffic into fewer cells \citep{notteboom2006impact}.
+
+\subsection{Full Closure Scenario Results}
+
+Table~\ref{tab:scenario_deltas} reports the results of the full closure scenario, in which each chokepoint is removed from the network and shortest-path costs are recomputed for all 1,540 port pairs. The vulnerability ranking by mean rerouting cost reveals a clear hierarchy:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Panama Canal}: mean $\Delta$ cost of 17,840~km-equivalent, 298 pairs affected (19.4\%). Panama closure forces Atlantic--Pacific traffic onto extremely long trans-Pacific or Cape Horn alternatives, producing the largest per-route rerouting costs. The relatively small number of affected pairs reflects that most global trade does not transit Panama, but those that do face devastating detours.
+  \item \textbf{Strait of Gibraltar}: mean $\Delta$ cost of 10,624~km, 590 pairs affected (38.3\%). Gibraltar is the gateway between the Atlantic and Mediterranean; its closure forces extensive rerouting for Mediterranean-bound traffic via the Suez--Red Sea corridor or around Africa.
+  \item \textbf{Suez Canal}: mean $\Delta$ cost of 9,949~km, 469 pairs affected (30.5\%). Suez closure breaks the Mediterranean--Indian Ocean corridor, forcing traffic to reroute via the Cape of Good Hope or the Panama Canal. This is the most consequential corridor chokepoint given the volume and value of Asia--Europe trade it handles.
+  \item \textbf{Bab el-Mandeb}: mean $\Delta$ cost of 4,700~km, 454 pairs affected (29.5\%). Bab el-Mandeb guards the southern entrance to the Red Sea; closure forces Indian Ocean traffic to bypass the Suez corridor entirely.
+  \item \textbf{Bosporus}: mean $\Delta$ cost of 3,275~km, 159 pairs affected (10.3\%). Bosporus closure forces Black Sea ports onto the Constanta--Piraeus overland bypass at 5$\times$ normal cost.
+  \item \textbf{Strait of Malacca}: mean $\Delta$ cost of 1,754~km, 290 pairs affected (18.8\%). Malacca closure forces Indian Ocean--Pacific traffic through the alternative Lombok Strait south of Indonesia, adding approximately 1,000--3,000~km per affected route.
+\end{enumerate}
+
+\input{Tables/scenario_deltas_table}
+
+Figure~\ref{fig:closure_results} presents the full closure results visually, ranking choke points by mean rerouting cost and showing the fraction of pairs affected.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/scenario_summary.png}
+\caption{Full closure scenario results. Left: chokepoints ranked by mean rerouting cost (km-equivalent) across 1,540 port pairs. Right: fraction of port pairs affected (rerouted) by each chokepoint closure.}
+\label{fig:closure_results}
+\end{figure}
+
+Figure~\ref{fig:scenario_example_suez} zooms into the Suez Canal closure, showing the 20 most affected port pairs. These include key Asia--Europe routes that must detour via the Cape of Good Hope or the Panama Canal, with rerouting costs reaching thousands of km-equivalent per pair.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/scenario_example.png}
+\caption{Suez Canal closure: 20 most affected port pairs. Mediterranean--Indian Ocean traffic is forced onto dramatically longer alternative routes via the Cape of Good Hope or Panama Canal.}
+\label{fig:scenario_example_suez}
+\end{figure}
+
+Figure~\ref{fig:closure_map} maps the vulnerability per-port under the three highest-impact rerouting closures (Panama, Gibraltar, Suez). Each port is colored by its mean cost increase; the closed choke point is marked with an X. The geographic pattern is intuitive: ports closest to the closed chokepoint and most reliant on it for connectivity suffer the largest cost increases.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/closure_impact_map.png}
+\caption{Port vulnerability under the three highest-impact closures. Port color intensity reflects mean percentage cost increase. X marks the closed chokepoint.}
+\label{fig:closure_map}
+\end{figure}
+
+\subsection{Partial Degradation Scenarios}
+
+Figure~\ref{fig:partial_degradation} reports the results of the partial degradation scenario, in which edge costs at each chokepoint are multiplied by $\alpha \in \{1.25, 1.5, 2.0, 3.0, 5.0, 8.0, 10.0\}$ rather than the chokepoint being fully removed. This scenario captures congestion spikes, speed restrictions, or capacity reductions short of full closure \citep{notteboom2006impact}.
+
+The surface plot reveals the ``severity curve'' for each chokepoint as $\alpha$ increases. At the $\alpha = 5$ level, Gibraltar produces the largest mean cost increase, followed by the Suez Canal and Bab el-Mandeb. Even at the modest degradation level of $\alpha = 1.5$, the most critical chokepoints impose mean cost increases of 2--5\% across all port pairs.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{Figures/partial_degradation_surface.png}
+\caption{Partial degradation results: mean percentage cost increase across 1,540 port pairs for each chokepoint and degradation multiplier $\alpha$. The surface reveals nonlinear severity curves that accelerate at high $\alpha$ for corridor chokepoints. Congestion modeling approach follows \citet{allen2022welfare} and \citet{hierons2024spreading}.}
+\label{fig:partial_degradation}
+\end{figure}
+
+A notable pattern is the contrast between corridor chokepoints and bypass-dependent chokepoints. For Gibraltar and the Suez Canal, partial degradation directly increases costs for a large fraction of global trade routes, producing monotonically increasing severity curves. For Panama and the Strait of Malacca, the severity curves are more moderate because alternative routes (trans-Pacific, Lombok Strait) absorb rerouted traffic at relatively lower cost.
+
+\subsection{Port Vulnerability Analysis}
+
+Figure~\ref{fig:port_vulnerability} presents the full port-by-chokepoint vulnerability matrix: for each of the 56 ports and each of the 6 chokepoints, the cell value shows the mean percentage cost increase across all of that port's trade routes when the chokepoint is closed.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{Figures/port_vulnerability_heatmap.png}
+\caption{Port vulnerability heatmap: mean percentage cost increase for each port (rows) when each chokepoint (columns) is fully closed. Ports are sorted by maximum vulnerability; chokepoints by total impact.}
+\label{fig:port_vulnerability}
+\end{figure}
+
+The vulnerability matrix reveals three distinct port vulnerability profiles:
+\begin{itemize}[nosep]
+  \item \textbf{Bypass-dependent ports} (behind Bosporus) face the largest per-route cost increases when their chokepoint closes, as traffic must shift to the expensive overland bypass. Their vulnerability is concentrated on a single chokepoint.
+  \item \textbf{Corridor-dependent ports} (e.g., Mediterranean ports for Suez/Gibraltar, Indian Ocean ports for Malacca) face large but more moderate rerouting costs. Their vulnerability is \emph{graded}: it varies smoothly across chokepoints depending on their position in the network.
+  \item \textbf{Highly connected ports} (e.g., Rotterdam, New York, Los Angeles) with multiple routing options are resilient to any single closure. Their vulnerability is low and distributed across several chokepoints.
+\end{itemize}
+
+This taxonomy has direct implications for the security public-good argument: the ``hegemonic dividend'' from maintaining chokepoint security is heterogeneous across ports, with the largest benefits accruing to bypass-dependent ports and corridor-dependent ports in developing regions.
+
+\subsection{Security Risk Scenario Analysis}
+
+We apply risk premiums of 10\%, 20\%, 50\%, 100\%, and 200\% to each chokepoint \emph{individually} and measure the resulting mean cost increase across all 1,540 port pairs. This design produces a per-chokepoint vulnerability profile under security deterioration without requiring assumptions about which chokepoints are currently secure.
+
+Figure~\ref{fig:security_scenarios} shows the results. Gibraltar and the Suez Canal emerge as the most sensitive to risk premiums: a 100\% risk premium on Gibraltar alone increases mean trade costs by approximately 5\%, while the same premium on the Suez Canal produces a similar effect. Bab el-Mandeb follows closely. The ordering differs from the full-closure ranking because security-risk scenarios capture the \emph{incremental} effect of cost increases rather than the \emph{complete} effect of removal. Chokepoints with high baseline traffic and limited alternative routes are most sensitive to risk premiums.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/security_scenario_comparison.png}
+\caption{Security risk scenario: mean percentage cost increase from applying a risk premium to each chokepoint individually. Bars show per-chokepoint impact at five premium levels (10\%, 20\%, 50\%, 100\%, 200\%). This pure scenario approach avoids arbitrary ``high/low security'' categorization.}
+\label{fig:security_scenarios}
+\end{figure}
+
+The security scenario analysis enables a clean estimation of the ``hegemonic dividend'' as the \emph{cost that would be avoided if a chokepoint's risk were reduced to baseline}. For any given chokepoint $b$ and risk premium $\delta$, the dividend is simply the mean cost increase shown in Figure~\ref{fig:security_scenarios}. Aggregating across chokepoints, the total dividend represents the combined value of maintaining security at all major chokepoints. Under a 50\% risk premium applied uniformly to all six chokepoints, the aggregate dividend is substantial, consistent with the public-good characterization of maritime security \citep{besley2015welfare, bueger2024securing, oef2010economic}.
