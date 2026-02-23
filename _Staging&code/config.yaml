@@ -1,0 +1,371 @@
+# config.yaml
+# Maritime transport network: 78 nodes (56 ports + 6 chokepoints + 16 waypoints), ~155 edges
+#
+# DESIGN PRINCIPLES:
+#   1. Ports "behind" a mandatory-passage chokepoint connect ONLY through that
+#      chokepoint, plus an expensive overland bypass edge so that
+#      closure produces large but finite rerouting costs (not disconnection).
+#   2. Trans-ocean routes pass through ocean waypoints so that map visualizations
+#      follow realistic maritime arcs (no great-circle lines crossing continents).
+#   3. No edge should cross a major landmass (except explicit overland bypass
+#      edges, which carry high cost multipliers).
+#   4. Danish Straits and Strait of Hormuz are excluded from the chokepoint analysis.
+#   5. Cape of Good Hope is a waypoint, NOT a chokepoint.
+#
+# EDGE FORMAT:  [node_a, node_b]  or  [node_a, node_b, cost_mult]
+#   - cost_mult > 1.0 represents overland/pipeline bypass routes.
+#   - If omitted, cost_mult defaults to 1.0.
+
+# ── Chokepoint bounding boxes (6 — no Hormuz, no Danish, no Cape) ────────
+chokepoints:
+  Suez_Canal: [32.20, 32.65, 29.80, 31.30]
+  Bab_el_Mandeb: [42.25, 43.55, 12.15, 13.25]
+  Strait_of_Malacca: [99.00, 104.80, 1.00, 6.50]
+  Panama_Canal: [-80.20, -79.40, 8.70, 9.60]
+  Bosporus: [28.90, 29.30, 41.05, 41.25]
+  Gibraltar: [-6.20, -5.20, 35.80, 36.30]
+
+# ── Network nodes ──────────────────────────────────────────────────
+# type: port | chokepoint | waypoint
+# coords: [longitude, latitude]
+# behind: chokepoint name (if port is behind a mandatory-passage chokepoint)
+nodes:
+  # ─── Chokepoints (6) ───
+  Suez_Canal:          {type: chokepoint, coords: [32.35, 30.50]}
+  Bab_el_Mandeb:       {type: chokepoint, coords: [43.30, 12.60]}
+  Strait_of_Malacca:   {type: chokepoint, coords: [101.00, 3.50]}
+  Panama_Canal:        {type: chokepoint, coords: [-79.80, 9.10]}
+  Bosporus:            {type: chokepoint, coords: [29.05, 41.10]}
+  Gibraltar:           {type: chokepoint, coords: [-5.60, 36.00]}
+
+  # ─── Waypoints (16) ───
+  # Major ocean waypoints
+  Strait_of_Hormuz:    {type: waypoint, coords: [56.50, 26.00]}
+  Aden_Junction:       {type: waypoint, coords: [45.00, 12.80]}
+  South_Atlantic_WP:   {type: waypoint, coords: [-25.00, -15.00]}
+  Cape_of_Good_Hope:   {type: waypoint, coords: [18.50, -34.40]}
+  North_Pacific_WP:    {type: waypoint, coords: [-170.00, 35.00]}
+  North_Atlantic_WP:   {type: waypoint, coords: [-35.00, 42.00]}
+  Lombok_Strait:       {type: waypoint, coords: [115.50, -8.50]}
+  Mozambique_Channel:  {type: waypoint, coords: [40.00, -15.00]}
+  # New ocean waypoints for denser maritime routing
+  Arabian_Sea_WP:      {type: waypoint, coords: [62.00, 18.00]}
+  Bay_of_Bengal_WP:    {type: waypoint, coords: [85.00, 10.00]}
+  South_China_Sea_WP:  {type: waypoint, coords: [112.00, 12.00]}
+  East_Med_WP:         {type: waypoint, coords: [18.00, 35.00]}
+  Caribbean_Sea_WP:    {type: waypoint, coords: [-72.00, 15.00]}
+  West_Africa_WP:      {type: waypoint, coords: [-5.00, 2.00]}
+  Norwegian_Sea_WP:    {type: waypoint, coords: [5.00, 58.00]}
+  Central_Pacific_WP:  {type: waypoint, coords: [-145.00, 22.00]}
+
+  # ─── PERSIAN GULF PORTS (connect through Hormuz waypoint) ───
+  Dubai:               {type: port, coords: [55.27, 25.20]}
+  Jebel_Ali:           {type: port, coords: [55.03, 25.00]}
+  Basra:               {type: port, coords: [47.85, 30.50]}
+  Dammam:              {type: port, coords: [50.10, 26.43]}
+  Bandar_Abbas:        {type: port, coords: [56.28, 27.18]}
+
+  # ─── BLACK SEA PORTS (behind Bosporus) ───
+  Constanta:           {type: port, coords: [28.65, 44.17], behind: Bosporus}
+  Odessa:              {type: port, coords: [30.75, 46.48], behind: Bosporus}
+  Novorossiysk:        {type: port, coords: [37.77, 44.72], behind: Bosporus}
+
+  # ─── BALTIC PORTS (no chokepoint gate) ───
+  St_Petersburg:       {type: port, coords: [30.30, 59.93]}
+  Gdansk:              {type: port, coords: [18.65, 54.35]}
+  Stockholm:           {type: port, coords: [18.07, 59.33]}
+  Helsinki:            {type: port, coords: [24.97, 60.15]}
+
+  # ─── RED SEA / EAST AFRICAN PORTS ───
+  Jeddah:              {type: port, coords: [39.17, 21.48]}
+  Djibouti:            {type: port, coords: [43.15, 11.59]}
+
+  # ─── EAST ASIAN PORTS ───
+  Shanghai:            {type: port, coords: [121.47, 31.23]}
+  Singapore:           {type: port, coords: [103.85, 1.29]}
+  Busan:               {type: port, coords: [129.03, 35.10]}
+  Hong_Kong:           {type: port, coords: [114.17, 22.28]}
+  Shenzhen:            {type: port, coords: [113.93, 22.53]}
+  Tokyo:               {type: port, coords: [139.69, 35.69]}
+  Kaohsiung:           {type: port, coords: [120.30, 22.62]}
+  Port_Klang:          {type: port, coords: [101.39, 3.00]}
+
+  # ─── SOUTH / SOUTHEAST ASIAN PORTS ───
+  Mumbai:              {type: port, coords: [72.88, 18.93]}
+  Colombo:             {type: port, coords: [79.86, 6.93]}
+
+  # ─── MEDITERRANEAN PORTS ───
+  Piraeus:             {type: port, coords: [23.63, 37.94]}
+  Genoa:               {type: port, coords: [8.93, 44.41]}
+  Barcelona:           {type: port, coords: [2.17, 41.38]}
+  Port_Said:           {type: port, coords: [32.30, 31.26]}
+  Algeciras:           {type: port, coords: [-5.45, 36.13]}
+  Tangier_Med:         {type: port, coords: [-5.80, 35.87]}
+
+  # ─── NORTHWEST EUROPEAN PORTS ───
+  Rotterdam:           {type: port, coords: [4.48, 51.92]}
+  Hamburg:             {type: port, coords: [9.97, 53.55]}
+  Antwerp:             {type: port, coords: [4.40, 51.22]}
+  Felixstowe:          {type: port, coords: [1.35, 51.96]}
+  Le_Havre:            {type: port, coords: [0.11, 49.49]}
+  Bremerhaven:         {type: port, coords: [8.58, 53.54]}
+
+  # ─── WEST AFRICAN PORTS ───
+  Lagos:               {type: port, coords: [3.39, 6.45]}
+  Dakar:               {type: port, coords: [-17.45, 14.69]}
+
+  # ─── EAST / SOUTH AFRICAN PORTS ───
+  Mombasa:             {type: port, coords: [39.66, -4.04]}
+  Durban:              {type: port, coords: [31.03, -29.87]}
+
+  # ─── NORTH AMERICAN PORTS ───
+  New_York:            {type: port, coords: [-74.01, 40.67]}
+  Houston:             {type: port, coords: [-95.27, 29.75]}
+  Savannah:            {type: port, coords: [-81.10, 32.08]}
+  Los_Angeles:         {type: port, coords: [-118.25, 33.73]}
+  Vancouver:           {type: port, coords: [-123.11, 49.29]}
+  Norfolk:             {type: port, coords: [-76.29, 36.85]}
+  Miami:               {type: port, coords: [-80.19, 25.77]}
+  Halifax:             {type: port, coords: [-63.57, 44.65]}
+
+  # ─── CENTRAL / SOUTH AMERICAN PORTS ───
+  Colon:               {type: port, coords: [-79.88, 9.36]}
+  Balboa:              {type: port, coords: [-79.57, 8.97]}
+  Santos:              {type: port, coords: [-46.30, -23.95]}
+  Buenos_Aires:        {type: port, coords: [-58.37, -34.60]}
+  Cartagena:           {type: port, coords: [-75.51, 10.39]}
+  Manzanillo_MX:       {type: port, coords: [-104.32, 19.05]}
+  Callao:              {type: port, coords: [-77.12, -12.05]}
+  Valparaiso:          {type: port, coords: [-71.63, -33.04]}
+
+# ── Network edges ──────────────────────────────────────────────────
+# Format: [node_a, node_b] or [node_a, node_b, cost_multiplier]
+# cost_multiplier > 1 represents overland bypasses.
+# Distances computed at runtime via haversine.
+edges:
+
+  # ══════════════════════════════════════════════════════════════
+  # PERSIAN GULF (through Hormuz waypoint + Arabian Sea WP)
+  # ══════════════════════════════════════════════════════════════
+  - [Dubai, Strait_of_Hormuz]
+  - [Jebel_Ali, Strait_of_Hormuz]
+  - [Basra, Dammam]
+  - [Dammam, Strait_of_Hormuz]
+  - [Bandar_Abbas, Strait_of_Hormuz]
+  - [Dubai, Jebel_Ali]
+  - [Dammam, Dubai]
+  - [Bandar_Abbas, Dubai]
+  # Hormuz → Arabian Sea waypoint → onward
+  - [Strait_of_Hormuz, Arabian_Sea_WP]
+  - [Arabian_Sea_WP, Aden_Junction]
+  - [Arabian_Sea_WP, Mumbai]
+  - [Arabian_Sea_WP, Colombo]
+
+  # ══════════════════════════════════════════════════════════════
+  # BLACK SEA (behind Bosporus) + overland bypass
+  # ══════════════════════════════════════════════════════════════
+  - [Constanta, Bosporus]
+  - [Odessa, Bosporus]
+  - [Novorossiysk, Bosporus]
+  - [Constanta, Odessa]
+  - [Odessa, Novorossiysk]
+  # Overland bypass: Constanta → Piraeus (rail/truck proxy)
+  - [Constanta, Piraeus, 5.0]
+
+  # ══════════════════════════════════════════════════════════════
+  # BALTIC (connected directly to NW Europe — no chokepoint gate)
+  # ══════════════════════════════════════════════════════════════
+  - [St_Petersburg, Helsinki]
+  - [Helsinki, Stockholm]
+  - [Gdansk, Stockholm]
+  - [St_Petersburg, Gdansk]
+  - [Gdansk, Hamburg]
+  - [Stockholm, Hamburg]
+  # Baltic to Norwegian Sea waypoint
+  - [Stockholm, Norwegian_Sea_WP]
+  - [Hamburg, Norwegian_Sea_WP]
+
+  # ══════════════════════════════════════════════════════════════
+  # SUEZ CORRIDOR / RED SEA
+  # ══════════════════════════════════════════════════════════════
+  - [Suez_Canal, Bab_el_Mandeb]
+  - [Suez_Canal, Port_Said]
+  - [Bab_el_Mandeb, Aden_Junction]
+  - [Aden_Junction, Mombasa]
+  - [Aden_Junction, Djibouti]
+  - [Jeddah, Suez_Canal]
+  - [Jeddah, Bab_el_Mandeb]
+  - [Djibouti, Bab_el_Mandeb]
+  # Red Sea to Gulf via Jeddah
+  - [Jeddah, Dammam, 6.0]
+
+  # ══════════════════════════════════════════════════════════════
+  # BAY OF BENGAL / INDIAN OCEAN WAYPOINTS
+  # ══════════════════════════════════════════════════════════════
+  - [Mumbai, Colombo]
+  - [Mumbai, Bay_of_Bengal_WP]
+  - [Colombo, Bay_of_Bengal_WP]
+  - [Bay_of_Bengal_WP, Strait_of_Malacca]
+  - [Bay_of_Bengal_WP, Lombok_Strait]
+
+  # ══════════════════════════════════════════════════════════════
+  # MALACCA + LOMBOK ALTERNATIVE + SOUTH CHINA SEA
+  # ══════════════════════════════════════════════════════════════
+  - [Strait_of_Malacca, Singapore]
+  - [Strait_of_Malacca, Port_Klang]
+  - [Singapore, Port_Klang]
+  # South China Sea waypoint
+  - [Singapore, South_China_Sea_WP]
+  - [South_China_Sea_WP, Hong_Kong]
+  - [South_China_Sea_WP, Kaohsiung]
+  - [South_China_Sea_WP, Shanghai]
+  # Lombok alternative
+  - [Lombok_Strait, Singapore]
+  - [Lombok_Strait, South_China_Sea_WP]
+
+  # ══════════════════════════════════════════════════════════════
+  # EAST MEDITERRANEAN (via East Med waypoint)
+  # ══════════════════════════════════════════════════════════════
+  - [Port_Said, East_Med_WP]
+  - [East_Med_WP, Piraeus]
+  - [East_Med_WP, Genoa]
+  - [East_Med_WP, Barcelona]
+  - [Bosporus, Piraeus]
+  - [Bosporus, East_Med_WP]
+  - [Piraeus, Genoa]
+  - [Piraeus, Barcelona]
+  - [Genoa, Barcelona]
+  - [Barcelona, Algeciras]
+  - [Piraeus, Algeciras]
+
+  # ══════════════════════════════════════════════════════════════
+  # GIBRALTAR + WESTERN MEDITERRANEAN
+  # ══════════════════════════════════════════════════════════════
+  - [Gibraltar, Algeciras]
+  - [Gibraltar, Tangier_Med]
+  - [Algeciras, Tangier_Med]
+
+  # ══════════════════════════════════════════════════════════════
+  # NORTHWEST EUROPE INTERNAL
+  # ══════════════════════════════════════════════════════════════
+  - [Rotterdam, Antwerp]
+  - [Rotterdam, Hamburg]
+  - [Rotterdam, Felixstowe]
+  - [Rotterdam, Le_Havre]
+  - [Rotterdam, Bremerhaven]
+  - [Hamburg, Bremerhaven]
+  - [Antwerp, Le_Havre]
+  - [Felixstowe, Le_Havre]
+
+  # ══════════════════════════════════════════════════════════════
+  # NW EUROPE ↔ MEDITERRANEAN / ATLANTIC (via Gibraltar)
+  # ══════════════════════════════════════════════════════════════
+  - [Le_Havre, Gibraltar]
+  - [Rotterdam, Gibraltar]
+  - [Felixstowe, Gibraltar]
+
+  # ══════════════════════════════════════════════════════════════
+  # TRANS-ATLANTIC (via Norwegian Sea + North Atlantic waypoints)
+  # ══════════════════════════════════════════════════════════════
+  - [Le_Havre, North_Atlantic_WP]
+  - [Norwegian_Sea_WP, North_Atlantic_WP]
+  - [Felixstowe, North_Atlantic_WP]
+  - [North_Atlantic_WP, Halifax]
+  - [North_Atlantic_WP, New_York]
+  - [North_Atlantic_WP, Norfolk]
+  # West Africa to Atlantic
+  - [Gibraltar, Dakar]
+  - [Dakar, North_Atlantic_WP]
+  - [Dakar, West_Africa_WP]
+
+  # ══════════════════════════════════════════════════════════════
+  # EAST ASIA INTERNAL
+  # ══════════════════════════════════════════════════════════════
+  - [Shanghai, Busan]
+  - [Shanghai, Hong_Kong]
+  - [Shanghai, Kaohsiung]
+  - [Shanghai, Tokyo]
+  - [Busan, Tokyo]
+  - [Hong_Kong, Shenzhen]
+  - [Hong_Kong, Kaohsiung]
+  - [Shenzhen, Kaohsiung]
+
+  # ══════════════════════════════════════════════════════════════
+  # TRANS-PACIFIC (via Central Pacific + North Pacific waypoints)
+  # ══════════════════════════════════════════════════════════════
+  - [Tokyo, North_Pacific_WP]
+  - [Busan, North_Pacific_WP]
+  - [North_Pacific_WP, Central_Pacific_WP]
+  - [Central_Pacific_WP, Vancouver]
+  - [Central_Pacific_WP, Los_Angeles]
+  - [Balboa, Central_Pacific_WP]
+
+  # ══════════════════════════════════════════════════════════════
+  # INDIAN OCEAN / EAST-SOUTH AFRICA
+  # ══════════════════════════════════════════════════════════════
+  - [Mombasa, Durban]
+  - [Mombasa, Mozambique_Channel]
+  - [Durban, Mozambique_Channel]
+  - [Mombasa, Arabian_Sea_WP]
+  - [Colombo, Mombasa]
+
+  # ══════════════════════════════════════════════════════════════
+  # CAPE OF GOOD HOPE (waypoint connecting IO and South Atlantic)
+  # ══════════════════════════════════════════════════════════════
+  - [Cape_of_Good_Hope, Durban]
+  - [Cape_of_Good_Hope, South_Atlantic_WP]
+  - [Cape_of_Good_Hope, Mozambique_Channel]
+
+  # ══════════════════════════════════════════════════════════════
+  # WEST AFRICA (via West Africa waypoint)
+  # ══════════════════════════════════════════════════════════════
+  - [Lagos, West_Africa_WP]
+  - [West_Africa_WP, South_Atlantic_WP]
+  - [Lagos, Dakar]
+
+  # ══════════════════════════════════════════════════════════════
+  # SOUTH ATLANTIC / SOUTH AMERICA
+  # ══════════════════════════════════════════════════════════════
+  - [Santos, Buenos_Aires]
+  - [Santos, South_Atlantic_WP]
+  - [Buenos_Aires, South_Atlantic_WP]
+  - [Santos, West_Africa_WP]
+  - [Santos, Cape_of_Good_Hope]
+
+  # ══════════════════════════════════════════════════════════════
+  # CARIBBEAN (via Caribbean Sea waypoint)
+  # ══════════════════════════════════════════════════════════════
+  - [Miami, Caribbean_Sea_WP]
+  - [Caribbean_Sea_WP, Colon]
+  - [Caribbean_Sea_WP, Cartagena]
+  - [Caribbean_Sea_WP, Houston]
+  - [Miami, Savannah]
+  - [Savannah, Norfolk]
+  - [Norfolk, New_York]
+  - [New_York, Halifax]
+  - [Houston, Miami]
+
+  # ══════════════════════════════════════════════════════════════
+  # NORTH AMERICA — PACIFIC COAST
+  # ══════════════════════════════════════════════════════════════
+  - [Los_Angeles, Vancouver]
+  - [Los_Angeles, Manzanillo_MX]
+  - [Manzanillo_MX, Balboa]
+
+  # ══════════════════════════════════════════════════════════════
+  # PANAMA CANAL + ATLANTIC / PACIFIC LINK
+  # ══════════════════════════════════════════════════════════════
+  - [Panama_Canal, Colon]
+  - [Panama_Canal, Balboa]
+  - [Colon, Caribbean_Sea_WP]
+
+  # ══════════════════════════════════════════════════════════════
+  # SOUTH AMERICA — PACIFIC COAST
+  # ══════════════════════════════════════════════════════════════
+  - [Balboa, Callao]
+  - [Callao, Valparaiso]
+
+  # ══════════════════════════════════════════════════════════════
+  # SOUTH AMERICA — CARIBBEAN → SOUTH ATLANTIC
+  # ══════════════════════════════════════════════════════════════
+  - [Santos, Caribbean_Sea_WP]

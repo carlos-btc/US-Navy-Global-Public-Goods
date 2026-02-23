@@ -1,0 +1,556 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{natbib}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Smaller citations
+\renewcommand{\bibsection}{}
+\setbeamertemplate{bibliography item}[text]
+\bibliographystyle{apalike}
+
+% Compact itemize
+\setbeamertemplate{itemize items}[circle]
+
+\title[Maritime Security \& Chokepoint Vulnerability]{Maritime Security as a Global Public Good:\\
+Trade Frictions, Chokepoint Vulnerability, and a\\Scenario Engine Using AIS Shipping Density}
+\author{Carlos}
+\institute{Econ 33550 --- Spatial Economics}
+\date{\today}
+
+\begin{document}
+
+% ============================================================
+% Frame 1: Title
+% ============================================================
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ============================================================
+% Frame 2: Motivation
+% ============================================================
+\begin{frame}{Motivation}
+  \begin{itemize}
+    \item $\sim$80\% of world trade by volume traverses the oceans \citep{verschuur2023systemic}
+    \item Trade funnels through a small number of physical bottlenecks: straits, canals, narrow sea lanes
+    \item When security breaks down $\Rightarrow$ rerouting, congestion, elevated trade costs
+    \item The U.S. Navy provides security at these chokepoints as a \textbf{global public good} \citep{bueger2024securing}
+    \item \textbf{Key question:} What is the economic value of this security provision?
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+% Frame 3: Research Question
+% ============================================================
+\begin{frame}{Research Question}
+  \begin{block}{Central Question}
+    How sensitive is the global maritime trading system to disruptions at critical chokepoints, and what is the economic value of security provision that prevents or mitigates such disruptions?
+  \end{block}
+  \vspace{8pt}
+  \begin{itemize}
+    \item Approach: scenario-based quantitative spatial framework
+    \item Not causal estimation --- counterfactual simulation
+    \item Builds on transportation networks literature \citep{fajgelbaum2020optimal, allen2022welfare}
+    \item AIS data from IMF \citep{cerdeiro2020wstms} for empirical grounding
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+% Frame 4: Literature --- Maritime Security
+% ============================================================
+\begin{frame}{Literature: Maritime Security as a Public Good}
+  \begin{itemize}
+    \item Maritime security exhibits classic public-good properties: \textbf{non-rivalry} and partial \textbf{non-excludability} \citep{bueger2019maritime, bueger2024securing}
+    \item Legal foundations: freedom of navigation, passage through straits \citep{kraska2015law}
+    \item Economic costs of insecurity documented:
+    \begin{itemize}
+      \item Piracy: ransoms, insurance, rerouting, deterred investment \citep{oef2010economic}
+      \item African development impacts \citep{mbekeani2011piracy}
+    \end{itemize}
+    \item Gap: the \emph{value} of security provision remains poorly quantified
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+% Frame 5: Literature --- Trade Frictions
+% ============================================================
+\begin{frame}{Literature: Trade Frictions \& Maritime Risk}
+  \begin{itemize}
+    \item \citet{besley2015welfare}: piracy acts as a \textbf{cost shifter} for international shipping
+    \begin{itemize}
+      \item Spatial/temporal variation in piracy risk $\Rightarrow$ shipping cost impacts
+    \end{itemize}
+    \item \citet{verschuur2023systemic}: chokepoint disruptions cause systemic GDP impacts
+    \begin{itemize}
+      \item Some scenarios: several \% of GDP for vulnerable economies
+    \end{itemize}
+    \item Port congestion literature: capacity constraints $\Rightarrow$ freight rate increases \citep{notteboom2006impact, du2020port}
+    \item Maritime transport economics: market structure, pricing \citep{morabito2023thesis}
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+% Frame 6: Literature --- Quantitative Spatial Economics
+% ============================================================
+\begin{frame}{Literature: Quantitative Spatial Economics}
+  \begin{itemize}
+    \item Foundational framework: \citet{redding2017quantitative}
+    \begin{itemize}
+      \item Locations differ in productivity; trade costs govern flows across space
+    \end{itemize}
+    \item Regional and urban extensions: \citet{allen2025quantitative}, \citet{redding2025urban}
+    \item Key toolkit: iceberg trade costs, gravity trade flows, hat-algebra counterfactuals
+    \item Agglomeration foundations: \citet{duranton2004micro}
+    \item Geography of development: \citet{desmet2015geography}
+    \item ``What can be learned'': \citet{proost2019what}
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+% Frame 7: Literature --- Transportation Networks
+% ============================================================
+\begin{frame}{Literature: Transportation Networks \& Congestion}
+  \begin{itemize}
+    \item \citet{fajgelbaum2020optimal}: optimal transport networks in spatial equilibrium
+    \begin{itemize}
+      \item Endogenous route choice; optimal networks concentrate on high-traffic corridors
+    \end{itemize}
+    \item \citet{allen2022welfare}: welfare effects of infrastructure with endogenous congestion
+    \item \citet{donaldson2025transport}: comprehensive survey of infrastructure evaluation
+    \item Congestion pricing: \citet{hierons2024spreading}
+    \item Political fragmentation: \citet{bordeu2025commuting}
+    \item Network model structure: \citet{rossihansberg2020transportation}
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+% Frame 8: Literature --- AIS Data & Gap
+% ============================================================
+\begin{frame}{Literature: AIS Data \& Research Gap}
+  \begin{itemize}
+    \item AIS data: cornerstone of modern maritime economics \citep{kerbl2022ais}
+    \item COVID shock on container flows: \citet{cariou2021ais}
+    \item Nowcasting world trade from AIS: \citet{cerdeiro2020nowcasting}
+    \item IMF World Seaborne Trade Monitoring System: \citet{cerdeiro2020wstms}
+  \end{itemize}
+  \vspace{6pt}
+  \begin{alertblock}{Gap}
+    No existing work combines a global maritime network model with endogenous rerouting and congestion to value security provision under counterfactual disruptions.
+  \end{alertblock}
+\end{frame}
+
+% ============================================================
+% Frame 9: Data --- AIS Raster
+% ============================================================
+\begin{frame}{Data: AIS Ship Density Raster}
+  \begin{itemize}
+    \item Source: IMF World Seaborne Trade Monitoring System \citep{cerdeiro2020wstms}
+    \item Period: January 2015 -- February 2021
+    \item Resolution: $0.005\degree \times 0.005\degree$ ($\approx$ 500m $\times$ 500m at equator)
+    \item Each cell: total count of AIS position reports
+    \item Format: single GeoTIFF ($\sim$9 GB) + overview pyramids ($\sim$3 GB)
+    \item Processing: overviews for visualization, windowed reads for chokepoints
+  \end{itemize}
+  \vspace{4pt}
+  \begin{block}{Key statistics}
+    Median cell = 0, P90 = 1, P99 $\approx$ 8.6M, Max $\approx$ 50.6M
+  \end{block}
+\end{frame}
+
+% ============================================================
+% Frame 10: Data --- Global Density Map
+% ============================================================
+\begin{frame}{Global Shipping Density (Log Scale)}
+  \centering
+  \includegraphics[width=0.92\textwidth]{../Figures/generated/global_quicklook.png}
+  \vspace{2pt}
+  {\small Extremely right-skewed: most ocean is empty; traffic concentrates at sea lanes and chokepoints.}
+\end{frame}
+
+% ============================================================
+% Frame 11: Chokepoint Bounding Box Example
+% ============================================================
+\begin{frame}{Chokepoint Definitions: Bounding Box Approach}
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      \small
+      Six chokepoints defined as geographic bounding boxes:
+      \begin{enumerate}
+        \footnotesize
+        \item \textbf{Suez Canal}
+        \item Bab el-Mandeb
+        \item Strait of Malacca
+        \item Panama Canal
+        \item Bosporus
+        \item Gibraltar
+      \end{enumerate}
+      \vspace{4pt}
+      Selected per \citet{verschuur2023systemic, bueger2024securing}.
+    \end{column}
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{../Figures/generated/bounding_box_example.png}
+      {\tiny Suez Canal: AIS density with bounding box}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ============================================================
+% Frame 12: Chokepoint Rankings
+% ============================================================
+\begin{frame}{Chokepoint Traffic Intensity}
+  \centering
+  \includegraphics[width=0.85\textwidth]{../Figures/generated/chokepoint_ranking.png}
+  \vspace{2pt}
+  {\small Traffic intensity ranking across six chokepoints from AIS density data.}
+\end{frame}
+
+% ============================================================
+% Frame 13: Suez Density Detail
+% ============================================================
+\begin{frame}{AIS Density Detail: Suez Canal}
+  \centering
+  \includegraphics[width=0.65\textwidth]{../Figures/generated/suez_intensity_detail.png}
+  \vspace{2pt}
+  {\small Traffic concentrates along the canal corridor and approach channels from Port Said and Suez.}
+\end{frame}
+
+% ============================================================
+% Frame 14: Suez Descriptive Statistics
+% ============================================================
+\begin{frame}{Suez Canal: Descriptive Statistics}
+  \centering
+  \includegraphics[width=0.82\textwidth]{../Figures/generated/suez_density_stats.png}
+\end{frame}
+
+% ============================================================
+% Frame 15: Methods --- Network Construction
+% ============================================================
+\begin{frame}{Methods: Maritime Transport Network}
+  \begin{columns}[T]
+    \begin{column}{0.42\textwidth}
+      \small
+      $G = (\mathcal{J}, \mathcal{E})$: 78 nodes, $\sim$155 edges
+      \begin{itemize}
+        \item \textbf{56 ports}: major world ports at real coordinates
+        \item \textbf{6 chokepoints}: maritime bottlenecks
+        \item \textbf{16 waypoints}: ocean routing nodes
+      \end{itemize}
+      \vspace{4pt}
+      Key design: \textbf{bypass-dependent}
+      \begin{itemize}
+        \footnotesize
+        \item Black Sea $\rightarrow$ Bosporus (bypass: rail at 5$\times$)
+        \item Malacca bypass: Lombok Strait
+        \item Suez bypass: Cape of Good Hope
+      \end{itemize}
+      \vspace{4pt}
+      1,540 port-to-port OD pairs
+    \end{column}
+    \begin{column}{0.56\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{../Figures/generated/network_world_map.png}
+      {\tiny 78-node maritime network with bypass routes}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ============================================================
+% Frame 16: Methods --- Edge Cost
+% ============================================================
+\begin{frame}{Methods: Edge Cost Specification}
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      Generalized cost of edge $e$:
+      \begin{equation*}
+        t_e = \bar{t}_e \cdot \left(\Xi_e\right)^{\lambda}
+      \end{equation*}
+      \begin{equation*}
+        \bar{t}_e = \text{dist}_e \cdot m_e
+      \end{equation*}
+      \begin{itemize}
+        \small
+        \item $\Xi_e$: AIS congestion proxy
+        \item $\lambda \geq 0$: congestion elasticity
+        \item $m_e$: security/risk multiplier
+      \end{itemize}
+      \citep{allen2022welfare, hierons2024spreading}
+    \end{column}
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{../Figures/generated/edge_cost_diagram.png}
+      {\tiny Suez--Red Sea corridor with edge distances}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ============================================================
+% Frame 17: Methods --- Security Cost Shifter
+% ============================================================
+\begin{frame}{Methods: Security as a Cost Shifter}
+  \begin{equation*}
+    m_e = m_e^{\text{base}} \cdot (1 + \delta_{\text{risk}} \cdot \text{Risk}_e) \cdot (1 - \delta_{\text{sec}} \cdot S_e)
+  \end{equation*}
+  \centering
+  \includegraphics[width=0.82\textwidth]{../Figures/generated/security_shifter_comparison.png}
+  \vspace{2pt}
+  {\small Left: baseline costs. Right: +100\% risk premium doubles edge costs at Bab el-Mandeb \citep{besley2015welfare}.}
+\end{frame}
+
+% ============================================================
+% Frame 18: Methods --- Congestion Calibration
+% ============================================================
+\begin{frame}{Methods: Congestion Calibration from AIS}
+  \centering
+  \includegraphics[width=0.82\textwidth]{../Figures/generated/congestion_calibration.png}
+  \vspace{2pt}
+  {\small AIS intensity $\rightarrow$ congestion multiplier $m_b \in [1, 1.5]$ via log-scaling \citep{notteboom2006impact, du2020port}.}
+\end{frame}
+
+% ============================================================
+% Frame 19: Methods --- Route Choice
+% ============================================================
+\begin{frame}{Methods: Route Choice Before/After}
+  \centering
+  \includegraphics[width=0.92\textwidth]{../Figures/generated/route_choice_before_after.png}
+  \vspace{2pt}
+  {\small Shanghai $\rightarrow$ Rotterdam: Suez closure forces rerouting via North Pacific $\rightarrow$ Panama \citep{cariou2021ais}.}
+\end{frame}
+
+% ============================================================
+% Frame 20: Methods --- Scenario Design
+% ============================================================
+\begin{frame}{Methods: Three Scenario Types}
+  \begin{enumerate}
+    \item \textbf{Full closure}: Remove chokepoint $b$; recompute all 1,540 shortest paths
+    \item \textbf{Partial degradation}: Multiply edge costs by $\alpha \in \{1.25, \ldots, 10.0\}$
+    \item \textbf{Security risk premium}: Apply $\delta_{\text{risk}} \in \{10\%, \ldots, 200\%\}$ per chokepoint
+  \end{enumerate}
+  \vspace{4pt}
+  \centering
+  \includegraphics[width=0.82\textwidth]{../Figures/generated/suez_scenario_3panel.png}
+  {\tiny Suez Canal: 3 scenarios illustrated}
+\end{frame}
+
+% ============================================================
+% Frame 21: Results --- Full Closure Ranking
+% ============================================================
+\begin{frame}{Results: Full Closure --- Vulnerability Ranking}
+  \centering
+  \small
+  \begin{tabular}{lrrrc}
+    \toprule
+    Chokepoint Removed & Mean $\Delta$ (km) & Affected & Disconn. & Total \\
+    \midrule
+    Panama Canal      & 17,840 & 298 & 0 & 1,540 \\
+    Gibraltar         & 10,624 & 590 & 0 & 1,540 \\
+    Suez Canal        & 9,949  & 469 & 0 & 1,540 \\
+    Bab el-Mandeb     & 4,700  & 454 & 0 & 1,540 \\
+    Bosporus          & 3,275  & 159 & 0 & 1,540 \\
+    Strait of Malacca & 1,754  & 290 & 0 & 1,540 \\
+    \bottomrule
+  \end{tabular}
+  \vspace{4pt}
+  {\small 0 disconnected pairs: bypass routes (overland, Lombok, Cape of Good Hope) ensure all ports remain connected.}
+\end{frame}
+
+% ============================================================
+% Frame 22: Results --- Closure Summary Chart
+% ============================================================
+\begin{frame}{Results: Full Closure --- Visual Summary}
+  \centering
+  \includegraphics[width=0.92\textwidth]{../Figures/generated/scenario_summary.png}
+  \vspace{2pt}
+  {\small Left: mean rerouting cost. Right: fraction of 1,540 pairs affected by each closure.}
+\end{frame}
+
+% ============================================================
+% Frame 23: Results --- Suez Closure Detail
+% ============================================================
+\begin{frame}{Results: Suez Canal Closure}
+  \centering
+  \includegraphics[width=0.82\textwidth]{../Figures/generated/scenario_example.png}
+  \vspace{2pt}
+  {\small 469 pairs affected. Asia--Europe traffic rerouted via Cape of Good Hope or Panama Canal.\\Mean $\Delta$ = 9,949 km, Max $\Delta$ = 23,317 km. 0 pairs disconnected.}
+\end{frame}
+
+% ============================================================
+% Frame 24: Results --- Closure Impact World Map
+% ============================================================
+\begin{frame}{Results: Port Vulnerability Under Closure}
+  \centering
+  \includegraphics[width=0.92\textwidth]{../Figures/generated/closure_impact_map.png}
+  \vspace{2pt}
+  {\small Port color = mean \% cost increase. X = closed chokepoint. Panama, Gibraltar, Suez shown.}
+\end{frame}
+
+% ============================================================
+% Frame 25: Results --- Partial Degradation Surface
+% ============================================================
+\begin{frame}{Results: Partial Degradation Surface}
+  \centering
+  \includegraphics[width=0.78\textwidth]{../Figures/generated/partial_degradation_surface.png}
+  \vspace{2pt}
+  {\small At $\alpha=5$: Gibraltar +26.5\%, Suez +12.7\%, Bab el-Mandeb +10.1\%, Bosporus +4.5\%.}
+\end{frame}
+
+% ============================================================
+% Frame 26: Results --- Port Vulnerability Heatmap
+% ============================================================
+\begin{frame}{Results: Port Vulnerability Matrix}
+  \centering
+  \includegraphics[width=0.65\textwidth]{../Figures/generated/port_vulnerability_heatmap.png}
+  \vspace{2pt}
+  {\small 56 ports $\times$ 6 chokepoints. Color = mean \% cost increase under full closure.}
+\end{frame}
+
+% ============================================================
+% Frame 27: Results --- Security Scenarios
+% ============================================================
+\begin{frame}{Results: Per-Chokepoint Security Risk}
+  \centering
+  \includegraphics[width=0.85\textwidth]{../Figures/generated/security_scenario_comparison.png}
+  \vspace{2pt}
+  {\small Pure scenario: risk premium applied to \emph{one chokepoint at a time}. No ``high/low'' categorization.}
+\end{frame}
+
+% ============================================================
+% Frame 28: Results --- Cost Per Day
+% ============================================================
+\begin{frame}{Results: Daily Rerouting Cost of Closure}
+  \centering
+  \small
+  \begin{tabular}{lrrrr}
+    \toprule
+    Chokepoint & Daily Vessels & Detour (km) & Cost/Day (Low) & Cost/Day (High) \\
+    \midrule
+    Gibraltar    & 219 & 10,624 & \$116M & \$233M \\
+    Panama       & 37  & 17,840 & \$33M  & \$66M  \\
+    Suez Canal   & 53  & 9,949  & \$27M  & \$53M  \\
+    Malacca      & 233 & 1,754  & \$20M  & \$41M  \\
+    Bosporus     & 118 & 3,275  & \$19M  & \$39M  \\
+    Bab el-Mandeb & 68 & 4,700  & \$16M  & \$32M  \\
+    \bottomrule
+  \end{tabular}
+  \vspace{4pt}
+  {\small Low = \$50/km; High = \$100/km. Aggregate: \$230--460M/day across all chokepoints.}
+\end{frame}
+
+% ============================================================
+% Frame 29: Discussion --- Hegemonic Dividend
+% ============================================================
+\begin{frame}{The Hegemonic Dividend}
+  \begin{itemize}
+    \item \textbf{Daily costs}: Gibraltar closure alone $\Rightarrow$ \$117--233M/day in rerouting costs
+    \item \textbf{Aggregate}: simultaneous closure of all six chokepoints $\Rightarrow$ \$85--170B/year
+    \item The ``hegemonic dividend'' = avoided cost from maintaining security
+    \item Dividend is \textbf{increasing in risk}: value of security rises as conditions worsen
+    \item Heterogeneous benefits: bypass-dependent ports (Black Sea) benefit most
+  \end{itemize}
+  \vspace{4pt}
+  \citep{bueger2024securing, besley2015welfare, oef2010economic}
+\end{frame}
+
+% ============================================================
+% Frame 30: Discussion --- Structural Patterns
+% ============================================================
+\begin{frame}{Structural Patterns}
+  \begin{itemize}
+    \item \textbf{Two types of chokepoints}:
+    \begin{itemize}
+      \item \emph{Through-corridor} (Malacca, Gibraltar, Suez, Panama): rerouting costs, gradual impact
+      \item \emph{Bypass-dependent} (Bosporus): expensive overland rerouting at 5$\times$ cost
+    \end{itemize}
+    \item \textbf{Policy implications differ}: capacity expansion vs.\ redundancy investment
+    \item \textbf{Nonlinear severity}: severity curves accelerate at high $\alpha$ for corridor chokepoints
+    \item \textbf{Supply chain resilience}: Panama Canal closure produces largest mean detour (17,840 km)
+    \item Connects to: optimal networks \citep{fajgelbaum2020optimal}, congestion \citep{hierons2024spreading}, spatial policy \citep{fajgelbaum2020spatial}
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+% Frame 31: Limitations
+% ============================================================
+\begin{frame}{Limitations}
+  \begin{itemize}
+    \item \textbf{Static aggregate}: single 2015--2021 snapshot; no temporal dynamics
+    \item \textbf{Aggregate density}: AIS counts, not shipped value; no vessel-type distinction \citep{kerbl2022ais}
+    \item \textbf{No welfare computation}: delta costs, not GE welfare changes \citep{redding2017quantitative}
+    \item \textbf{Exogenous security}: risk premiums are sensitivity inputs, not calibrated
+    \item \textbf{Stylized network}: 78 nodes captures major routes but not all alternatives
+    \item All results labeled as \textbf{``partial-exercise'' estimates}
+  \end{itemize}
+\end{frame}
+
+% ============================================================
+% Frame 32: Policy Implications
+% ============================================================
+\begin{frame}{Policy Implications}
+  \begin{enumerate}
+    \item \textbf{Resource allocation}: prioritize through-corridor chokepoints (Gibraltar, Suez, Bab el-Mandeb) for capacity maintenance \citep{fajgelbaum2020spatial}
+    \item \textbf{Redundancy investment}: bypass-dependent chokepoints need alternative infrastructure (overland routes)
+    \item \textbf{Burden-sharing}: economic case for security strengthens as risk rises \citep{oef2010economic, mbekeani2011piracy}
+    \item \textbf{Supply chain diversification}: corridor-dependent ports should develop alternative routing \citep{bordeu2025commuting}
+    \item \textbf{Optimal security allocation}: spatial policy framework \citep{fajgelbaum2025optimal, gaubert2025place}
+  \end{enumerate}
+\end{frame}
+
+% ============================================================
+% Frame 33: Future Research
+% ============================================================
+\begin{frame}{Future Research Directions}
+  \begin{enumerate}
+    \item \textbf{Vessel-level AIS}: OD flow matrices, route-choice models \citep{kerbl2022ais, fajgelbaum2020optimal, fajgelbaum2020supplement}
+    \item \textbf{Bilateral trade data}: calibrate full spatial equilibrium \citep{allen2025quantitative, redding2025urban}
+    \item \textbf{Insurance \& risk data}: calibrate security parameters \citep{besley2015welfare}
+    \item \textbf{Naval presence proxies}: move from simulation to causal inference \citep{proost2019what}
+    \item \textbf{Dynamic extensions}: stochastic disruptions \citep{bordeu2025commuting, desmet2015geography}
+    \item \textbf{Optimal allocation}: security budget across chokepoints \citep{rossihansberg2004optimal, fajgelbaum2019state}
+  \end{enumerate}
+\end{frame}
+
+% ============================================================
+% Frame 34: Conclusion
+% ============================================================
+\begin{frame}{Conclusion}
+  \begin{block}{Takeaways}
+    \begin{enumerate}
+      \item Chokepoint disruptions produce \textbf{large, heterogeneous} trade-cost impacts
+      \begin{itemize}
+        \item Panama: 17,840 km mean rerouting; Suez: 9,949 km; Gibraltar: 10,624 km
+      \end{itemize}
+      \item Two vulnerability types: \textbf{rerouting} (through-corridor) vs \textbf{expensive bypass} (bypass-dependent)
+      \item The \textbf{hegemonic dividend} is increasing in the risk environment
+      \item Daily closure costs: \textbf{\$16M--\$233M/day} depending on chokepoint
+      \item This is a \textbf{replicable framework} identifying data needs for full causal assessment
+    \end{enumerate}
+  \end{block}
+  \vspace{4pt}
+  \centering
+  {\small \citet{bueger2024securing, fajgelbaum2020optimal, besley2015welfare, verschuur2023systemic}}
+\end{frame}
+
+% ============================================================
+% Frame 35: Appendix Overview
+% ============================================================
+\begin{frame}{Appendix: All Chokepoint Bounding Boxes}
+  \centering
+  \includegraphics[width=0.92\textwidth]{../Figures/generated/appendix_all_bboxes_world.png}
+  \vspace{2pt}
+  {\small Six chokepoint bounding boxes overlaid on world map. Individual zooms in paper appendix.}
+\end{frame}
+
+% ============================================================
+% Frame 36: References
+% ============================================================
+\begin{frame}[allowframebreaks]{References}
+  \tiny
+  \bibliography{../Bibliography/references}
+\end{frame}
+
+\end{document}
