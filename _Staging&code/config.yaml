@@ -6,7 +6,7 @@
 #      chokepoint, plus an expensive overland bypass edge so that
 #      closure produces large but finite rerouting costs (not disconnection).
 #   2. Trans-ocean routes pass through ocean waypoints so that map visualizations
-#      follow realistic maritime arcs (no great-circle lines crossing continents).
+#      follow realistic maritime arcs.
 #   3. No edge should cross a major landmass (except explicit overland bypass
 #      edges, which carry high cost multipliers).
 #   4. Danish Straits and Strait of Hormuz are excluded from the chokepoint analysis.
