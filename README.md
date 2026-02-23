@@ -367,7 +367,8 @@ Carpi, C. (2026). *Maritime Security as a Global Public Good: Trade Frictions an
 
 ## 11. Contact
 
-Carlos
+Carlos Carpi
+carpi@uchicago.edu
 University of Chicago
-MACS 30200
+MACS 30200, Winter 2026
 
