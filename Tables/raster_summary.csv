@@ -1,2 +1,0 @@
-crs,bounds_left,bounds_right,bounds_bottom,bounds_top,nodata,sample_shape_h,sample_shape_w,nan_share,min,p50,p90,p99,max
-EPSG:4326,-180.015311275,180.01468872500004,-84.98735206299992,85.00264793700009,2147483647.0,1800,3600,0.0,0.0,0.0,1.0,8556701.079999998,50559638.0

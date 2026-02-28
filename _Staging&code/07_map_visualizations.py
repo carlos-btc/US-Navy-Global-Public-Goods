@@ -124,6 +124,51 @@ def draw_path_segments(ax, path, nodes, color="#e74c3c", linewidth=3, alpha=0.9)
 # ========================================================================
 # FIGURE 1: Bounding Box Example (Suez Canal)
 # ========================================================================
+# def make_bounding_box_example():
+#     print("  Creating bounding_box_example.png ...")
+#     cfg = load_config()
+#     bbox = cfg["chokepoints"]["Suez_Canal"]
+#     lon_min, lon_max, lat_min, lat_max = bbox
+
+#     pad = 2.0
+#     data, extent = read_ais_window(lon_min - pad, lon_max + pad,
+#                                     lat_min - pad, lat_max + pad)
+
+#     fig, ax = plt.subplots(1, 1, figsize=(10, 8),
+#                            subplot_kw={"projection": ccrs.PlateCarree()})
+#     ax.set_extent([lon_min - pad, lon_max + pad,
+#                    lat_min - pad, lat_max + pad], ccrs.PlateCarree())
+#     ax.add_feature(cfeature.LAND, facecolor="#e8e4d8", edgecolor="gray", linewidth=0.5)
+#     ax.add_feature(cfeature.COASTLINE, linewidth=0.5)
+#     ax.add_feature(cfeature.BORDERS, linewidth=0.3, linestyle=":")
+
+#     log_data = np.log1p(data)
+#     im = ax.imshow(log_data, extent=extent, origin="upper",
+#                    cmap="inferno", alpha=0.85, transform=ccrs.PlateCarree(),
+#                    interpolation="bilinear")
+#     cbar = plt.colorbar(im, ax=ax, shrink=0.7, pad=0.02)
+#     cbar.set_label("log(1 + AIS position count)", fontsize=11)
+
+#     rect = mpatches.Rectangle((lon_min, lat_min), lon_max - lon_min, lat_max - lat_min,
+#                                linewidth=2.5, edgecolor="cyan", facecolor="none",
+#                                linestyle="--", transform=ccrs.PlateCarree())
+#     ax.add_patch(rect)
+
+#     ax.text(lon_min + (lon_max - lon_min) / 2, lat_max + 0.15,
+#             "Suez Canal\nBounding Box",
+#             ha="center", va="bottom", fontsize=12, fontweight="bold",
+#             color="cyan", transform=ccrs.PlateCarree(),
+#             bbox=dict(boxstyle="round,pad=0.3", facecolor="black", alpha=0.6))
+
+#     ax.set_title("AIS Ship Density with Chokepoint Bounding Box:\nSuez Canal",
+#                  fontsize=14, fontweight="bold")
+#     ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.5)
+
+#     plt.tight_layout()
+#     plt.savefig(OUTDIR / "bounding_box_example.png", dpi=200, bbox_inches="tight")
+#     plt.close()
+
+
 def make_bounding_box_example():
     print("  Creating bounding_box_example.png ...")
     cfg = load_config()
@@ -143,10 +188,17 @@ def make_bounding_box_example():
     ax.add_feature(cfeature.BORDERS, linewidth=0.3, linestyle=":")
 
     log_data = np.log1p(data)
-    im = ax.imshow(log_data, extent=extent, origin="upper",
-                   cmap="inferno", alpha=0.85, transform=ccrs.PlateCarree(),
-                   interpolation="bilinear")
-    cbar = plt.colorbar(im, ax=ax, shrink=0.7, pad=0.02)
+
+    # --- swap the color scale (reverse the existing colormap) ---
+    im = ax.imshow(
+        log_data, extent=extent, origin="upper",
+        cmap="inferno_r",  # swapped scale vs. inferno
+        alpha=0.85, transform=ccrs.PlateCarree(),
+        interpolation="bilinear"
+    )
+
+    # Slightly more padding so the bar sits a bit farther from the axes
+    cbar = plt.colorbar(im, ax=ax, shrink=0.7, pad=0.05)
     cbar.set_label("log(1 + AIS position count)", fontsize=11)
 
     rect = mpatches.Rectangle((lon_min, lat_min), lon_max - lon_min, lat_max - lat_min,
@@ -162,11 +214,16 @@ def make_bounding_box_example():
 
     ax.set_title("AIS Ship Density with Chokepoint Bounding Box:\nSuez Canal",
                  fontsize=14, fontweight="bold")
-    ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.5)
+
+    # --- prevent label overlap with the colorbar on the right ---
+    gl = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.5)
+    gl.right_labels = False   # key fix: removes labels that overlap the colorbar
+    gl.top_labels = False     # optional but usually cleaner; remove if you want top labels
 
     plt.tight_layout()
     plt.savefig(OUTDIR / "bounding_box_example.png", dpi=200, bbox_inches="tight")
     plt.close()
+
 
 
 # ========================================================================
@@ -211,10 +268,10 @@ def make_network_world_map():
             ax.plot(lon, lat, "D", color="red", markersize=9, markeredgecolor="white",
                     markeredgewidth=0.8, transform=ccrs.PlateCarree(), zorder=5)
             ax.text(lon + 1.5, lat + 1.5, name.replace("_", " "),
-                    fontsize=7, fontweight="bold", color="red",
+                    fontsize=14, fontweight="bold", color="red", #changed from 7 to 14
                     transform=ccrs.PlateCarree(), zorder=6,
                     bbox=dict(boxstyle="round,pad=0.15", facecolor="white",
-                              alpha=0.7, edgecolor="none"))
+                              alpha=0.9, edgecolor="none")) #changed from 0.7 to 0.9
         elif info["type"] == "port":
             ax.plot(lon, lat, "o", color="#2c7bb6", markersize=4,
                     markeredgecolor="white", markeredgewidth=0.3,
@@ -249,6 +306,12 @@ def make_network_world_map():
 # ========================================================================
 # FIGURE 3: Edge Cost Diagram (Suez-Red Sea corridor)
 # ========================================================================
+
+#changed fontsize from 8 to 12 and some other parameters
+#changed linewidth from 2.5 to 3.5
+#changed markersize from 10 to 12
+#changed markersize from 8 to 10
+#changed markersize from 8 to 10
 def make_edge_cost_diagram():
     print("  Creating edge_cost_diagram.png ...")
     cfg = load_config()
@@ -294,12 +357,12 @@ def make_edge_cost_diagram():
             lon_b, lat_b = nodes[b]["coords"]
             dist = haversine(lat_a, lon_a, lat_b, lon_b)
             ax.plot([lon_a, lon_b], [lat_a, lat_b],
-                    color="#e74c3c", linewidth=2.5, alpha=0.8,
+                    color="#e74c3c", linewidth=3.5, alpha=0.8,
                     transform=ccrs.PlateCarree())
             mid_lon = (lon_a + lon_b) / 2
             mid_lat = (lat_a + lat_b) / 2
             ax.text(mid_lon, mid_lat, f"{dist:.0f} km",
-                    fontsize=8, ha="center", va="center",
+                    fontsize=12, ha="center", va="center",
                     transform=ccrs.PlateCarree(),
                     bbox=dict(boxstyle="round,pad=0.2", facecolor="yellow",
                               alpha=0.8, edgecolor="none"))
@@ -309,15 +372,15 @@ def make_edge_cost_diagram():
             lon, lat = nodes[n]["coords"]
             ntype = nodes[n]["type"]
             if ntype == "chokepoint":
-                ax.plot(lon, lat, "D", color="red", markersize=10,
+                ax.plot(lon, lat, "D", color="red", markersize=12,
                         markeredgecolor="white", markeredgewidth=1,
                         transform=ccrs.PlateCarree(), zorder=5)
             elif ntype == "waypoint":
-                ax.plot(lon, lat, "s", color="orange", markersize=8,
+                ax.plot(lon, lat, "s", color="orange", markersize=10,
                         markeredgecolor="white", markeredgewidth=1,
                         transform=ccrs.PlateCarree(), zorder=5)
             else:
-                ax.plot(lon, lat, "o", color="#2c7bb6", markersize=8,
+                ax.plot(lon, lat, "o", color="#2c7bb6", markersize=10,
                         markeredgecolor="white", markeredgewidth=1,
                         transform=ccrs.PlateCarree(), zorder=5)
             ax.text(lon + 0.5, lat + 0.5, n.replace("_", " "),
@@ -329,7 +392,7 @@ def make_edge_cost_diagram():
     ax.set_title("Edge Cost Illustration: Suez--Red Sea Corridor\n"
                  r"$t_e = \mathrm{dist}_e \times m_e \times \Xi_e^{\lambda}$",
                  fontsize=14, fontweight="bold")
-    ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.5)
+    ax.gridlines(draw_labels=True, linewidth=0.5, alpha=0.5)
 
     plt.tight_layout()
     plt.savefig(OUTDIR / "edge_cost_diagram.png", dpi=200, bbox_inches="tight")
@@ -339,6 +402,12 @@ def make_edge_cost_diagram():
 # ========================================================================
 # FIGURE 4: Security Cost Shifter Before/After
 # ========================================================================
+#changed fontsize from 12 to 16
+#changed fontsize from 8 to 12
+#changed fontsize from 8 to 12
+#changed linewidth from 3.0 to 5.0
+
+
 def make_security_shifter_comparison():
     print("  Creating security_shifter_comparison.png ...")
     cfg = load_config()
@@ -374,7 +443,7 @@ def make_security_shifter_comparison():
                 lon_b, lat_b = nodes[b]["coords"]
                 dist = haversine(lat_a, lon_a, lat_b, lon_b)
                 cost = dist * risk_mult if (a == "Bab_el_Mandeb" or b == "Bab_el_Mandeb") else dist
-                width = 3.0 if (a == "Bab_el_Mandeb" or b == "Bab_el_Mandeb") else 1.5
+                width = 5.0 if (a == "Bab_el_Mandeb" or b == "Bab_el_Mandeb") else 1.5
                 color = "#e74c3c" if risk_mult > 1 and (a == "Bab_el_Mandeb" or b == "Bab_el_Mandeb") else "#2c7bb6"
                 ax.plot([lon_a, lon_b], [lat_a, lat_b],
                         color=color, linewidth=width, alpha=0.8,
@@ -382,7 +451,7 @@ def make_security_shifter_comparison():
                 mid_lon = (lon_a + lon_b) / 2
                 mid_lat = (lat_a + lat_b) / 2
                 ax.text(mid_lon + 0.3, mid_lat - 0.3, f"{cost:.0f}",
-                        fontsize=8, ha="center",
+                        fontsize=14, ha="center",
                         transform=ccrs.PlateCarree(),
                         bbox=dict(boxstyle="round,pad=0.15",
                                   facecolor="yellow" if risk_mult == 1 else "#ffcccc",
@@ -393,21 +462,21 @@ def make_security_shifter_comparison():
                 lon, lat = nodes[n]["coords"]
                 marker = "D" if nodes[n]["type"] == "chokepoint" else ("s" if nodes[n]["type"] == "waypoint" else "o")
                 color = "red" if nodes[n]["type"] == "chokepoint" else ("#2c7bb6" if nodes[n]["type"] == "port" else "orange")
-                ax.plot(lon, lat, marker, color=color, markersize=9,
+                ax.plot(lon, lat, marker, color=color, markersize=12,
                         markeredgecolor="white", markeredgewidth=0.8,
                         transform=ccrs.PlateCarree(), zorder=5)
                 ax.text(lon + 0.5, lat + 0.5, n.replace("_", " "),
-                        fontsize=8, fontweight="bold",
+                        fontsize=12, fontweight="bold",
                         transform=ccrs.PlateCarree(),
                         bbox=dict(boxstyle="round,pad=0.15", facecolor="white",
                                   alpha=0.8, edgecolor="none"))
 
-        ax.set_title(title, fontsize=13, fontweight="bold")
+        ax.set_title(title, fontsize=16, fontweight="bold")
         ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.3)
 
     fig.suptitle("Security Cost Shifter: Impact of Risk Premium on Edge Costs\n"
                  r"$m_e = m_e^{\mathrm{base}} \times (1 + \delta_{\mathrm{risk}} \times \mathrm{Risk}_e)$",
-                 fontsize=15, fontweight="bold", y=1.02)
+                 fontsize=20, fontweight="bold", y=1.02)
     plt.tight_layout()
     plt.savefig(OUTDIR / "security_shifter_comparison.png", dpi=200, bbox_inches="tight")
     plt.close()
@@ -416,6 +485,13 @@ def make_security_shifter_comparison():
 # ========================================================================
 # FIGURE 5: Congestion Calibration
 # ========================================================================
+#changed fontsize from 12 to 16
+#changed fontsize from 8 to 12
+#changed fontsize from 8 to 12
+#changed linewidth from 3.0 to 5.0
+#changed markersize from 10 to 12
+#changed markersize from 8 to 10
+#changed markersize from 8 to 10
 def make_congestion_calibration():
     print("  Creating congestion_calibration.png ...")
     if not CHOKE_TAB.exists():
@@ -438,11 +514,11 @@ def make_congestion_calibration():
     names = [c.replace("_", " ") for c in df["chokepoint"]]
     ax1.barh(names, df["log_intensity"], color="#2c7bb6", edgecolor="white")
     ax1.set_xlabel("log(1 + Sum AIS Intensity)", fontsize=12)
-    ax1.set_title("AIS Traffic Intensity by Chokepoint", fontsize=13, fontweight="bold")
+    ax1.set_title("AIS Traffic Intensity by Chokepoint", fontsize=16, fontweight="bold")
     ax1.invert_yaxis()
-    ax1.tick_params(labelsize=10)
+    ax1.tick_params(labelsize=16)
     for i, v in enumerate(df["log_intensity"]):
-        ax1.text(v + 0.1, i, f"{v:.1f}", va="center", fontsize=9)
+        ax1.text(v + 0.1, i, f"{v:.1f}", va="center", fontsize=15)
 
     ax2 = axes[1]
     ax2.scatter(df["log_intensity"], df["congestion_mult"], s=120, c="#e74c3c",
@@ -450,7 +526,7 @@ def make_congestion_calibration():
     for _, row in df.iterrows():
         ax2.annotate(row["chokepoint"].replace("_", " "),
                      (row["log_intensity"], row["congestion_mult"]),
-                     textcoords="offset points", xytext=(5, 5), fontsize=8)
+                     textcoords="offset points", xytext=(5, 5), fontsize=12)
 
     x_range = np.linspace(lo, hi, 100)
     y_range = 1.0 + 0.5 * (x_range - lo) / (hi - lo + 1e-9)
@@ -459,10 +535,10 @@ def make_congestion_calibration():
     ax2.set_ylabel("Congestion Multiplier $m_b$", fontsize=12)
     ax2.set_title("Congestion Calibration:\nAIS Density to Cost Multiplier", fontsize=13,
                   fontweight="bold")
-    ax2.legend(fontsize=10)
+    ax2.legend(fontsize=16)
     ax2.grid(alpha=0.3)
     ax2.set_ylim(0.95, 1.55)
-    ax2.tick_params(labelsize=10)
+    ax2.tick_params(labelsize=14)
 
     plt.tight_layout()
     plt.savefig(OUTDIR / "congestion_calibration.png", dpi=200, bbox_inches="tight")
@@ -472,6 +548,15 @@ def make_congestion_calibration():
 # ========================================================================
 # FIGURE 6: Route Choice Before/After (uses waypoint-based paths)
 # ========================================================================
+#changed fontsize from 12 to 16
+#changed fontsize from 8 to 12
+#changed fontsize from 8 to 12
+#changed linewidth from 3.0 to 5.0
+#changed markersize from 10 to 12
+#changed markersize from 8 to 10
+#changed markersize from 8 to 10
+
+
 def make_route_choice_before_after():
     print("  Creating route_choice_before_after.png ...")
     cfg = load_config()
@@ -522,10 +607,10 @@ def make_route_choice_before_after():
         # Mark origin and destination
         for n, label in [("Shanghai", "Shanghai"), ("Rotterdam", "Rotterdam")]:
             lon, lat = nodes[n]["coords"]
-            ax.plot(lon, lat, "*", color="gold", markersize=15,
+            ax.plot(lon, lat, "*", color="gold", markersize=20,
                     markeredgecolor="black", markeredgewidth=0.8,
                     transform=ccrs.PlateCarree(), zorder=10)
-            ax.text(lon + 3, lat + 3, label, fontsize=10, fontweight="bold",
+            ax.text(lon + 3, lat + 3, label, fontsize=15, fontweight="bold",
                     transform=ccrs.PlateCarree(),
                     bbox=dict(boxstyle="round,pad=0.2", facecolor="white",
                               alpha=0.8, edgecolor="none"))
@@ -536,20 +621,20 @@ def make_route_choice_before_after():
                 ntype = nodes[n]["type"]
                 lon, lat = nodes[n]["coords"]
                 if ntype == "chokepoint":
-                    ax.plot(lon, lat, "D", color="red", markersize=7,
+                    ax.plot(lon, lat, "D", color="red", markersize=9,
                             markeredgecolor="white", markeredgewidth=0.5,
                             transform=ccrs.PlateCarree(), zorder=8)
                 elif ntype == "waypoint":
-                    ax.plot(lon, lat, "s", color="orange", markersize=5,
+                    ax.plot(lon, lat, "s", color="orange", markersize=8,
                             markeredgecolor="white", markeredgewidth=0.5,
                             transform=ccrs.PlateCarree(), zorder=7)
 
-        ax.set_title(f"{title}\nCost: {cost:,.0f} km-equiv.", fontsize=13, fontweight="bold")
+        ax.set_title(f"{title}\nCost: {cost:,.0f} km-equiv.", fontsize=20, fontweight="bold")
 
     delta = cost_shock - cost_base
     fig.suptitle(f"Route Choice: Shanghai to Rotterdam\n"
                  f"Suez closure adds {delta:,.0f} km ({delta/cost_base*100:.1f}%) to route cost",
-                 fontsize=15, fontweight="bold", y=1.02)
+                 fontsize=18, fontweight="bold", y=1.02)
     plt.tight_layout()
     plt.savefig(OUTDIR / "route_choice_before_after.png", dpi=200, bbox_inches="tight")
     plt.close()
@@ -558,6 +643,14 @@ def make_route_choice_before_after():
 # ========================================================================
 # FIGURE 7: Suez Canal 3-Panel Scenario Illustration
 # ========================================================================
+#changed fontsize from 12 to 16
+#changed fontsize from 8 to 12
+#changed fontsize from 8 to 12
+#changed linewidth from 3.0 to 5.0
+#changed markersize from 10 to 12
+#changed markersize from 8 to 10
+#changed markersize from 8 to 10
+
 def make_suez_scenario_3panel():
     print("  Creating suez_scenario_3panel.png ...")
     cfg = load_config()
@@ -594,14 +687,14 @@ def make_suez_scenario_3panel():
                     region[0] - 5 <= lon_b <= region[1] + 5):
                     if G.has_node(a) and G.has_node(b) and G.has_edge(a, b):
                         color = "#2c7bb6"
-                        width = 1.5
+                        width = 3.5
                         style = "-"
                         if base_cm > 1.5:
                             color = "#cc6633"
                             style = "--"
                         if extra and ("Suez_Canal" in [a, b]):
                             color = "#e74c3c"
-                            width = 2.5
+                            width = 4.5
                         ax.plot([lon_a, lon_b], [lat_a, lat_b],
                                 color=color, linewidth=width, alpha=0.7,
                                 linestyle=style, transform=ccrs.PlateCarree())
@@ -614,11 +707,11 @@ def make_suez_scenario_3panel():
         if "Suez_Canal" in nodes:
             lon, lat = nodes["Suez_Canal"]["coords"]
             if remove == "Suez_Canal":
-                ax.plot(lon, lat, "X", color="red", markersize=15,
+                ax.plot(lon, lat, "X", color="red", markersize=25,
                         markeredgecolor="white", markeredgewidth=1.5,
                         transform=ccrs.PlateCarree(), zorder=10)
             else:
-                ax.plot(lon, lat, "D", color="red", markersize=10,
+                ax.plot(lon, lat, "D", color="red", markersize=15,
                         markeredgecolor="white", markeredgewidth=1,
                         transform=ccrs.PlateCarree(), zorder=10)
 
@@ -626,7 +719,7 @@ def make_suez_scenario_3panel():
         for p in gulf_ports:
             if p in nodes:
                 lon, lat = nodes[p]["coords"]
-                ax.plot(lon, lat, "o", color="#2c7bb6", markersize=7,
+                ax.plot(lon, lat, "o", color="#2c7bb6", markersize=12,
                         markeredgecolor="white", markeredgewidth=0.5,
                         transform=ccrs.PlateCarree(), zorder=8)
                 ax.text(lon + 0.3, lat + 0.3, p.replace("_", " "),
@@ -645,15 +738,15 @@ def make_suez_scenario_3panel():
             status_color = "#2c7bb6"
 
         ax.text(0.5, 0.02, status, ha="center", va="bottom",
-                fontsize=12, fontweight="bold", color="white",
+                fontsize=22, fontweight="bold", color="white",
                 transform=ax.transAxes,
                 bbox=dict(boxstyle="round,pad=0.3", facecolor=status_color, alpha=0.8))
 
-        ax.set_title(title, fontsize=13, fontweight="bold")
+        ax.set_title(title, fontsize=23, fontweight="bold")
         ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.3)
 
     fig.suptitle("Suez Canal: Three Disruption Scenarios",
-                 fontsize=15, fontweight="bold", y=1.01)
+                 fontsize=25, fontweight="bold", y=1.01)
     plt.tight_layout()
     plt.savefig(OUTDIR / "suez_scenario_3panel.png", dpi=200, bbox_inches="tight")
     plt.close()
@@ -662,6 +755,47 @@ def make_suez_scenario_3panel():
 # ========================================================================
 # FIGURE 8: Suez Canal AIS Intensity Detail
 # ========================================================================
+# def make_suez_intensity_detail():
+#     print("  Creating suez_intensity_detail.png ...")
+#     cfg = load_config()
+#     bbox = cfg["chokepoints"]["Suez_Canal"]
+#     lon_min, lon_max, lat_min, lat_max = bbox
+
+#     pad = 0.5
+#     data, extent = read_ais_window(lon_min - pad, lon_max + pad,
+#                                     lat_min - pad, lat_max + pad, max_pixels=600)
+
+#     fig, ax = plt.subplots(1, 1, figsize=(10, 8),
+#                            subplot_kw={"projection": ccrs.PlateCarree()})
+#     ax.set_extent([lon_min - pad, lon_max + pad,
+#                    lat_min - pad, lat_max + pad], ccrs.PlateCarree())
+#     ax.add_feature(cfeature.LAND, facecolor="#e8e4d8", edgecolor="gray", linewidth=0.5)
+#     ax.add_feature(cfeature.COASTLINE, linewidth=0.5)
+
+#     log_data = np.log1p(data)
+#     im = ax.imshow(log_data, extent=extent, origin="upper",
+#                    cmap="hot", alpha=0.9, transform=ccrs.PlateCarree(),
+#                    interpolation="bilinear")
+#     cbar = plt.colorbar(im, ax=ax, shrink=0.7, pad=0.02)
+#     cbar.set_label("log(1 + AIS position count)", fontsize=11)
+
+#     if not np.all(np.isnan(data)):
+#         flat = data.flatten()
+#         valid = flat[~np.isnan(flat)]
+#         if len(valid) > 0:
+#             p99 = np.percentile(valid, 99)
+#             ax.text(0.02, 0.02, f"P99 intensity: {p99:,.0f}\nMax: {np.nanmax(data):,.0f}",
+#                     fontsize=10, transform=ax.transAxes, va="bottom",
+#                     bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
+
+#     ax.set_title("AIS Ship Density: Suez Canal (Detail)",
+#                  fontsize=14, fontweight="bold")
+#     ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.5)
+
+#     plt.tight_layout()
+#     plt.savefig(OUTDIR / "suez_intensity_detail.png", dpi=200, bbox_inches="tight")
+#     plt.close()
+
 def make_suez_intensity_detail():
     print("  Creating suez_intensity_detail.png ...")
     cfg = load_config()
@@ -680,10 +814,17 @@ def make_suez_intensity_detail():
     ax.add_feature(cfeature.COASTLINE, linewidth=0.5)
 
     log_data = np.log1p(data)
-    im = ax.imshow(log_data, extent=extent, origin="upper",
-                   cmap="hot", alpha=0.9, transform=ccrs.PlateCarree(),
-                   interpolation="bilinear")
-    cbar = plt.colorbar(im, ax=ax, shrink=0.7, pad=0.02)
+
+    # --- swap the color scale (reverse the existing colormap) ---
+    im = ax.imshow(
+        log_data, extent=extent, origin="upper",
+        cmap="hot_r",  # swapped scale vs. hot
+        alpha=0.9, transform=ccrs.PlateCarree(),
+        interpolation="bilinear"
+    )
+
+    # a bit more padding so the colorbar sits farther right
+    cbar = plt.colorbar(im, ax=ax, shrink=0.7, pad=0.05)
     cbar.set_label("log(1 + AIS position count)", fontsize=11)
 
     if not np.all(np.isnan(data)):
@@ -697,12 +838,15 @@ def make_suez_intensity_detail():
 
     ax.set_title("AIS Ship Density: Suez Canal (Detail)",
                  fontsize=14, fontweight="bold")
-    ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.5)
+
+    # --- prevent lat/lon labels from overlapping the colorbar on the right ---
+    gl = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.5)
+    gl.right_labels = False
+    gl.top_labels = False  # keeps things clean; remove if you want top labels
 
     plt.tight_layout()
     plt.savefig(OUTDIR / "suez_intensity_detail.png", dpi=200, bbox_inches="tight")
     plt.close()
-
 
 # ========================================================================
 # FIGURE 9: Suez Canal Density Stats (4-panel)
@@ -725,16 +869,43 @@ def make_suez_density_stats():
 
     fig, axes = plt.subplots(2, 2, figsize=(15, 13))
 
+    # # Panel A: Spatial intensity map
+    # ax = axes[0, 0]
+    # log_data = np.log1p(data)
+    # im = ax.imshow(log_data, cmap="hot", aspect="auto", interpolation="bilinear")
+    # ax.set_title("(a) Spatial Intensity Map", fontsize=16, fontweight="bold")
+    # cbar = plt.colorbar(im, ax=ax, shrink=0.8)
+    # cbar.set_label("log(1 + count)", fontsize=14)
+    # ax.set_xlabel("Longitude", fontsize=24)
+    # ax.set_ylabel("Latitude", fontsize=24)
+    # ax.tick_params(labelsize=9)
+
     # Panel A: Spatial intensity map
     ax = axes[0, 0]
+
     log_data = np.log1p(data)
-    im = ax.imshow(log_data, cmap="hot", aspect="auto", interpolation="bilinear")
+
+    # --- Improve contrast using percentile scaling ---
+    vmin = np.percentile(log_data[~np.isnan(log_data)], 5)
+    vmax = np.percentile(log_data[~np.isnan(log_data)], 99)
+
+    im = ax.imshow(
+        log_data,
+        cmap="hot_r",
+        aspect="auto",
+        interpolation="bilinear",
+        vmin=vmin,
+        vmax=vmax
+    )
+
     ax.set_title("(a) Spatial Intensity Map", fontsize=16, fontweight="bold")
+
     cbar = plt.colorbar(im, ax=ax, shrink=0.8)
-    cbar.set_label("log(1 + count)", fontsize=14)
-    ax.set_xlabel("Column (lon)", fontsize=14)
-    ax.set_ylabel("Row (lat)", fontsize=14)
-    ax.tick_params(labelsize=9)
+    cbar.set_label("log(1 + count)", fontsize=24)
+
+    ax.set_xlabel("Longitude", fontsize=24)
+    ax.set_ylabel("Latitude", fontsize=24)
+    ax.tick_params(labelsize=16)
 
     # Panel B: Cell distribution histogram
     ax = axes[0, 1]

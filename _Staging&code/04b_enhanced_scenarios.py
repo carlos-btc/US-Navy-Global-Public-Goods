@@ -41,6 +41,11 @@ BASELINE_STATS = ROOT / "Tables" / "generated" / "scenario_summary_stats.csv"
 # Output paths
 OUT_PARTIAL_CSV = ROOT / "Tables" / "generated" / "partial_degradation_results.csv"
 OUT_PARTIAL_FIG = ROOT / "Figures" / "generated" / "partial_degradation_surface.png"
+OUT_PARTIAL_FIG_3D = ROOT / "Figures" / "generated" / "partial_degradation_surface_3D.png"
+OUT_PARTIAL_FIG_3D_BETTER_ANGLE = ROOT / "Figures" / "generated" / "partial_degradation_surface_3D_better_angle.png"
+OUT_PARTIAL_FIG_LINES = ROOT / "Figures" / "generated" / "partial_degradation_surface_lines.png"
+#OUT_PARTIAL_FIG_LINES_BETTER_ANGLE = ROOT / "Figures" / "generated" / "partial_degradation_surface_lines_better_angle.png"
+
 OUT_VULN_CSV = ROOT / "Tables" / "generated" / "port_vulnerability.csv"
 OUT_VULN_FIG = ROOT / "Figures" / "generated" / "port_vulnerability_heatmap.png"
 OUT_SECURITY_CSV = ROOT / "Tables" / "generated" / "security_scenario_results.csv"
@@ -238,8 +243,91 @@ def run_partial_degradation():
             val = pivot.loc[choke, 5.0]
             print(f"    {choke.replace('_', ' '):25s}  {val:.2f}%")
 
-    return df, pivot
+    #return df, pivot
 
+
+    # ---- 3D SURFACE PLOT (improved view + contours) ----
+    pivot = heatmap_data.pivot(index="chokepoint", columns="alpha", values="pct_increase").fillna(0)
+
+    pivot["max_impact"] = pivot.max(axis=1)
+    pivot = pivot.sort_values("max_impact", ascending=False).drop(columns="max_impact")
+
+    fig = plt.figure(figsize=(15, 10))
+    ax = fig.add_subplot(111, projection="3d")
+
+    choke_names = list(pivot.index)
+    alpha_vals = [float(c) for c in pivot.columns]
+    X, Y = np.meshgrid(range(len(alpha_vals)), range(len(choke_names)))
+    Z = pivot.values
+
+    norm = mcolors.Normalize(vmin=0, vmax=max(Z.max(), 1))
+    colors = plt.cm.YlOrRd(norm(Z))
+
+    ax.plot_surface(
+        X, Y, Z,
+        facecolors=colors,
+        edgecolor="gray",
+        linewidth=0.5,
+        alpha=0.95,
+        shade=False
+    )
+
+    ax.set_xticks(range(len(alpha_vals)))
+    ax.set_xticklabels([f"{a:.1f}x" for a in alpha_vals], fontsize=16, rotation=20)
+    ax.set_yticks(range(len(choke_names)))
+    ax.set_yticklabels([c.replace("_", " ") for c in choke_names], fontsize=16)
+
+    ax.set_zlabel("Mean % cost increase", fontsize=11)
+    ax.set_xlabel("Degradation multiplier", fontsize=16, labelpad=10)
+    ax.set_ylabel("Chokepoint", fontsize=16, labelpad=10)
+    ax.set_title(
+        "Partial Degradation: Mean Trade Cost Increase\nby Chokepoint and Severity",
+        fontsize=18, fontweight="bold", pad=20
+    )
+
+# Better camera: higher elev + more side angle to reduce occlusion
+    ax.view_init(elev=35, azim=-70)
+
+    sm = plt.cm.ScalarMappable(cmap=plt.cm.YlOrRd, norm=norm)
+    sm.set_array([])
+    cbar = fig.colorbar(sm, ax=ax, shrink=0.5, pad=0.1)
+    cbar.set_label("Mean % cost increase", fontsize=16)
+
+    plt.tight_layout()
+    plt.savefig(OUT_PARTIAL_FIG.with_name(OUT_PARTIAL_FIG.stem + "_3D_better_angle.png"), dpi=200, bbox_inches="tight")
+    plt.close()
+
+
+
+    # ---- LINE PLOT: response curves by chokepoint ----
+    pivot = heatmap_data.pivot(index="chokepoint", columns="alpha", values="pct_increase").fillna(0)
+
+    pivot["max_impact"] = pivot.max(axis=1)
+    pivot = pivot.sort_values("max_impact", ascending=False).drop(columns="max_impact")
+
+    alpha_vals = [float(c) for c in pivot.columns]
+    fig, ax = plt.subplots(figsize=(12, 6))
+    for choke in pivot.index:
+        ax.plot(alpha_vals, pivot.loc[choke].values, linewidth=2, label=choke.replace("_", " "))
+        ax.set_xlabel("Degradation multiplier", fontsize=16)
+        ax.set_ylabel("Mean % cost increase", fontsize=16)
+    ax.set_title(
+        "Partial Degradation: Mean Trade Cost Increase (Curves)\nby Chokepoint and Severity",
+        fontsize=18, fontweight="bold", pad=12
+    )
+    ax.set_xticks(alpha_vals)
+    ax.set_xticklabels([f"{a:.1f}x" for a in alpha_vals], fontsize=16)
+    ax.tick_params(axis="y", labelsize=16)
+
+    # Legend outside to avoid clutter
+    ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=16, frameon=True)
+
+    plt.tight_layout()
+    plt.savefig(OUT_PARTIAL_FIG.with_name(OUT_PARTIAL_FIG.stem + "_lines.png"), dpi=200, bbox_inches="tight")
+    plt.close()
+    print(f"  Wrote {OUT_PARTIAL_FIG_LINES}")
+
+    return df, pivot
 
 # ---------------------------------------------------------------------------
 # PORT VULNERABILITY ANALYSIS

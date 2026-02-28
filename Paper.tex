@@ -1,7 +1,5 @@
 \documentclass[12pt]{article}
-%\usepackage{graphicx} % Required for inserting images
-%\usepackage[style=apa]{biblatex} % Feel free to change the style to another one you prefer
-%\addbibresource{Bibliography/references.bib}  
+
 % ── Packages ──────────────────────────────────────────────
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
@@ -15,51 +13,61 @@
 \usepackage{float}
 \usepackage{longtable}
 \usepackage{enumitem}
-\usepackage{booktabs,longtable,array,ragged2e}
-
-% Better p-columns: wrap + ragged right + allow \\ at end of cells
-\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
-\newcolumntype{C}[1]{>{\Centering\arraybackslash}p{#1}}
+\usepackage{tabularx}
+\usepackage{booktabs}
 
 % ── Bibliography ──────────────────────────────────────────
 \bibliographystyle{apalike}
-
 
 % ── Title ─────────────────────────────────────────────────
 \title{Maritime Security as a Global Public Good:\\
        Trade Frictions, Chokepoint Vulnerability, and a\\
        Scenario Engine Using AIS Shipping Density}
-\author{Carlos}
+\author{Carlos Carpi}
 \date{\today}
 
 \begin{document}
 
 \maketitle
 
+Below, useful links to the folks replicating this paper.
+
+\url{https://github.com/carlos-btc/Estimating-Maritime-Security-as-Global-Public-Goods}
+\url{https://www.overleaf.com/read/jgsvsjqsrsyn#a5ef30}
+
 \begin{abstract}
 \noindent
-This paper frames maritime security as a global public good and evaluates how disruptions at maritime bottlenecks exacerbate trade frictions by rerouting and causing congestion. Using high-resolution AIS ship-density rasters from the IMF World Seaborne Trade Monitoring System \citep{cerdeiro2020wstms}, we construct a 78-node maritime transport network---56 major ports, 6 chokepoints, and 16 ocean waypoints connected by approximately 155 edges following real-world shipping corridors---and implement a scenario engine that simulates the consequences of bottleneck closures, capacity reductions, and risk spikes across 1,540 port-to-port trade routes. Under full closure scenarios, the Panama Canal (mean rerouting cost of 17,840 km-equivalent), Gibraltar (10,624 km), and the Suez Canal (9,949 km) generate the largest rerouting costs. Bab el-Mandeb (4,700 km) and the Bosporus (3,275 km) force traffic onto longer maritime alternatives or expensive overland bypasses at 5$\times$ normal cost. A partial-capacity degradation exercise and a per-chokepoint security risk analysis demonstrate that even modest disruptions produce economically meaningful increases in trade costs, and that the marginal value of security provision increases with risk. We estimate daily rerouting costs of chokepoint closure ranging from \$16 million (Bab el-Mandeb) to \$233 million (Gibraltar), implying aggregate annual costs on the order of tens of billions of dollars. These findings provide a replicable, data-grounded framework for quantifying the ``hegemonic dividend'' — the economic value of the provision of systemic global security in the maritime commons of the status-quo.
-
-\end{abstract} \hspace{10pt}
+This paper frames maritime security as a global public good and evaluates how disruptions at maritime bottlenecks amplify trade frictions through rerouting and congestion. Using high-resolution AIS ship-density rasters from the IMF World Seaborne Trade Monitoring System \citep{cerdeiro2020wstms}, we construct a 78-node maritime transport network---56 major ports, 6 chokepoints, and 16 ocean waypoints connected by approximately 155 edges following real-world shipping corridors---and implement a scenario engine that simulates the consequences of bottleneck closures, capacity reductions, and risk spikes across 1,540 port-to-port trade routes. Under full closure scenarios, the Panama Canal (mean rerouting cost of 17,840 km-equivalent), Gibraltar (10,624 km), and the Suez Canal (9,949 km) generate the largest rerouting costs. Bab el-Mandeb (4,700 km) and the Bosporus (3,275 km) force traffic onto longer maritime alternatives or expensive overland bypasses at 5$\times$ normal cost. A partial-capacity degradation exercise and a per-chokepoint security risk analysis demonstrate that even modest disruptions produce economically meaningful trade-cost increases, and that the marginal value of security provision is increasing in the risk environment. We estimate daily rerouting costs of chokepoint closure ranging from \$16 million (Bab el-Mandeb) to \$233 million (Gibraltar), implying aggregate annual costs on the order of tens of billions of dollars. These findings provide a replicable, data-grounded framework for quantifying the ``hegemonic dividend''---the economic value of security provision in the global maritime commons.
+\end{abstract}
 
 \onehalfspacing
+
+% ══════════════════════════════════════════════════════════
+% MAIN BODY
+% ══════════════════════════════════════════════════════════
 
 \section{Introduction}
 \input{Paper_sections/Introduction}
 
-\section{Literature Review}
+\section{Related Literature}
+\label{sec:literature}
 \input{Paper_sections/LitReview}
 
 \section{Data and Methods}
-\input{Paper_sections/Data&Methods}
+\label{sec:data_methods}
+\input{Paper_sections/DataMethods}
 
 \section{Results}
+\label{sec:results}
 \input{Paper_sections/Results}
 
-\section{Discussion and Conclusion}
+\section{Discussion}
+\label{sec:discussion}
 \input{Paper_sections/Discussion}
 
-%\input{Bibliography/references}
+\section{Conclusion}
+\label{sec:conclusion}
+\input{Paper_sections/Conclusion}
 \newpage
 \bibliography{Bibliography/references}
 
@@ -67,148 +75,25 @@ This paper frames maritime security as a global public good and evaluates how di
 % APPENDICES
 % ══════════════════════════════════════════════════════════
 \appendix
-\newpage
-\section{Appendix}
+
+\section{Cost and Distance Assumptions}
+\label{sec:appendix_cost}
+\input{Paper_sections/AppendixCostAssumptions}
+
 \section{Chokepoint Bounding Box Maps}
 \label{sec:appendix_bboxes}
-
-Figure~\ref{fig:appendix_all_bboxes} shows all six chokepoint bounding boxes on a single world map. Figures~\ref{fig:appendix_bbox_suez}--\ref{fig:appendix_bbox_gibraltar} show individual zoomed maps for each chokepoint, with the AIS density visible in the background and the bounding box coordinates annotated.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{Figures/appendix_all_bboxes_world.png}
-\caption{All six chokepoint bounding boxes overlaid on a world map.}
-\label{fig:appendix_all_bboxes}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_bbox_Suez_Canal.png}
-\caption{Bounding box: Suez Canal.}
-\label{fig:appendix_bbox_suez}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_bbox_Bab_el_Mandeb.png}
-\caption{Bounding box: Bab el-Mandeb.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_bbox_Strait_of_Malacca.png}
-\caption{Bounding box: Strait of Malacca.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_bbox_Panama_Canal.png}
-\caption{Bounding box: Panama Canal.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_bbox_Bosporus.png}
-\caption{Bounding box: Bosporus.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_bbox_Gibraltar.png}
-\caption{Bounding box: Strait of Gibraltar.}
-\label{fig:appendix_bbox_gibraltar}
-\end{figure}
+\input{Paper_sections/AppendixBboxes}
 
 \section{Chokepoint Traffic Density Close-ups}
 \label{sec:appendix_density}
-
-Figures~\ref{fig:appendix_dens_suez}--\ref{fig:appendix_dens_gibraltar} show zoomed AIS density overlays for each chokepoint bounding box, with intensity statistics annotated.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_density_Suez_Canal.png}
-\caption{AIS density: Suez Canal.}
-\label{fig:appendix_dens_suez}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_density_Bab_el_Mandeb.png}
-\caption{AIS density: Bab el-Mandeb.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_density_Strait_of_Malacca.png}
-\caption{AIS density: Strait of Malacca.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_density_Panama_Canal.png}
-\caption{AIS density: Panama Canal.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_density_Bosporus.png}
-\caption{AIS density: Bosporus.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/appendix_density_Gibraltar.png}
-\caption{AIS density: Strait of Gibraltar.}
-\label{fig:appendix_dens_gibraltar}
-\end{figure}
+\input{Paper_sections/AppendixDensity}
 
 \section{Chokepoint Descriptive Statistics}
 \label{sec:appendix_stats}
-
-The full chokepoint intensity table is reported below, followed by four-panel descriptive statistics figures for each chokepoint.
-
-\input{Tables/chokepoint_density_table}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{Figures/appendix_stats_Suez_Canal.png}
-\caption{Descriptive statistics: Suez Canal.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{Figures/appendix_stats_Bab_el_Mandeb.png}
-\caption{Descriptive statistics: Bab el-Mandeb.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{Figures/appendix_stats_Strait_of_Malacca.png}
-\caption{Descriptive statistics: Strait of Malacca.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{Figures/appendix_stats_Panama_Canal.png}
-\caption{Descriptive statistics: Panama Canal.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{Figures/appendix_stats_Bosporus.png}
-\caption{Descriptive statistics: Bosporus.}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{Figures/appendix_stats_Gibraltar.png}
-\caption{Descriptive statistics: Strait of Gibraltar.}
-\end{figure}
+\input{Paper_sections/AppendixStats}
 
 \section{Ship-Count Estimation Under Closure Scenarios}
 \label{sec:appendix_shipcounts}
-
-\input{Paper_sections/Appendix6}
+\input{Paper_sections/AppendixShipCounts}
 
 \end{document}
-
