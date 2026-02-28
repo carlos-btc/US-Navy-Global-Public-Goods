@@ -1,0 +1,71 @@
+% Appendix D: Ship-Count Estimation Under Closure Scenarios
+
+\subsection{Baseline Annual Transit Estimates}
+
+To translate our network-based rerouting costs into concrete operational magnitudes, we estimate the number of vessels affected by each chokepoint closure scenario. We draw baseline annual transit counts from published sources---canal authority statistics, UNCTAD reports, and U.S.\ Energy Information Administration (EIA) data---rather than attempting to reverse-engineer vessel counts from our aggregate AIS density raster, which records cumulative position reports without distinguishing individual vessel transits.
+
+Table~\ref{tab:annual_transits} reports the baseline annual transit estimates for each chokepoint, along with the data source and the approximate range reflecting inter-year variation over the 2015--2021 period.
+
+\begin{table}[H]
+\centering
+\caption{Estimated annual vessel transits at each chokepoint. Ranges reflect inter-year variation over 2015--2021 and rounding uncertainty.}
+\label{tab:annual_transits}
+\begin{tabular}{lrrl}
+\toprule
+Chokepoint & Central Estimate & Range & Source \\
+\midrule
+Strait of Gibraltar & 80,000 & 70,000--100,000 & UNCTAD, Verschuur et al.\ (2023) \\
+Strait of Malacca   & 85,000 & 80,000--94,000  & IMO, UNCTAD \\
+Bosporus             & 43,000 & 40,000--46,000  & Turkish Directorate General \\
+Bab el-Mandeb        & 25,000 & 20,000--30,000  & UNCTAD, EIA \\
+Suez Canal           & 19,500 & 18,000--20,700  & Suez Canal Authority \\
+Panama Canal         & 13,500 & 12,000--14,500  & Panama Canal Authority \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Several caveats apply to these estimates. First, ``transits'' count individual vessel passages through the chokepoint; a vessel that makes multiple round trips during a year is counted multiple times. Second, transit counts include all vessel types (container ships, tankers, bulk carriers, military vessels, fishing vessels, passenger ships), not only cargo-carrying vessels relevant to trade. Third, the AIS density data in our primary analysis include vessel \emph{positions} (typically broadcast every 2--10 seconds), which are far more numerous than vessel transits. The distinction between cumulative AIS position counts and discrete vessel transits is critical: a single vessel transiting a chokepoint bounding box generates thousands to tens of thousands of AIS position reports depending on the transit duration and broadcast frequency.
+
+\subsection{Vessels Affected by Closure Scenarios}
+
+We estimate the number of vessels affected by each closure scenario by combining the baseline transit counts with the fraction of port pairs affected from our full closure analysis (Section~4.3). For each chokepoint $b$, the fraction of port pairs affected is $f_b = \text{Pairs Affected}_b / 1{,}540$. We multiply this fraction by the annual transit count to produce an \emph{order-of-magnitude} estimate of vessels requiring rerouting.
+
+This approach rests on two simplifying assumptions that we state explicitly:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Uniform traffic distribution}: We assume that vessel transits are approximately uniformly distributed across port pairs that use the chokepoint. In reality, a small number of high-volume trade corridors (e.g., Asia--Europe via Suez) dominate transit counts, so the actual number of affected vessels could be higher or lower than our estimate depending on whether high-volume pairs are disproportionately affected.
+  \item \textbf{Transit--pair proportionality}: We assume that the fraction of transits affected is proportional to the fraction of port pairs affected. This would be exact if all port pairs generated equal traffic volumes, which is clearly not the case. We therefore report our estimates as order-of-magnitude bounds.
+\end{enumerate}
+
+Table~\ref{tab:vessels_affected} reports the estimated vessels affected under each full closure scenario.
+
+\begin{table}[H]
+\centering
+\caption{Estimated annual vessels affected by chokepoint closure. Lower and upper bounds reflect the uncertainty range in baseline transit counts. ``Rerouted'' vessels must find alternative maritime routes; no vessels are fully disconnected under our network design (bypass routes exist for all chokepoints).}
+\label{tab:vessels_affected}
+\begin{tabular}{lrrrr}
+\toprule
+Chokepoint Closed & Pairs Affected (\%) & Central Est. & Lower Bound & Upper Bound \\
+\midrule
+Panama Canal       & 298 (19.4\%) & 2,600  & 2,300  & 2,800  \\
+Gibraltar          & 590 (38.3\%) & 30,600 & 26,800 & 38,300 \\
+Suez Canal         & 469 (30.5\%) & 5,900  & 5,500  & 6,300  \\
+Bab el-Mandeb      & 454 (29.5\%) & 7,400  & 5,900  & 8,800  \\
+Bosporus           & 159 (10.3\%) & 4,400  & 4,100  & 4,700  \\
+Strait of Malacca  & 290 (18.8\%) & 16,000 & 15,100 & 17,700 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Interpretation and Uncertainty}
+
+The estimates in Table~\ref{tab:vessels_affected} should be interpreted as rough order-of-magnitude indicators rather than precise predictions. Several sources of uncertainty merit discussion:
+
+\begin{itemize}[nosep]
+  \item \textbf{Traffic concentration}: If the affected port pairs include disproportionately high-volume corridors (e.g., Asia--Europe via Suez), the actual number of affected vessels could be 2--3$\times$ higher than our central estimate. Conversely, if the affected pairs are predominantly low-volume routes, the actual number could be lower.
+  \item \textbf{Vessel heterogeneity}: Different vessel types respond differently to chokepoint closure. Large container ships and VLCCs (Very Large Crude Carriers) face the highest rerouting costs due to fuel consumption and draft restrictions at alternative routes. Smaller vessels may have more flexibility. Our estimates treat all vessels equally.
+  \item \textbf{Dynamic adjustment}: In practice, chokepoint closure would trigger immediate queuing, followed by gradual fleet redeployment to alternative routes. The steady-state number of affected vessels (after adjustment) would differ from the initial impact. Our estimates reflect the steady-state assumption.
+  \item \textbf{Temporal variation}: Annual transit counts vary with global trade cycles, seasonal patterns, and geopolitical events. The 2020 COVID-19 pandemic reduced traffic at most chokepoints by 5--15\%; conversely, post-pandemic recovery saw record transits at several chokepoints. Our estimates use mid-period averages.
+\end{itemize}
+
+For trade-security assessments, the Suez Canal estimate is particularly policy-relevant. Approximately 19,500 vessels transit the Suez Canal annually, handling roughly 12\% of global trade by volume \citep{cariou2021ais}. Under our closure scenario, all Suez-dependent traffic must reroute via the Cape of Good Hope or through the Panama Canal, adding a mean of 9,949~km-equivalent to affected routes. The 2021 Ever Given grounding provided a real-world preview of such disruption: even a six-day blockage produced cascading supply-chain effects and measurable increases in shipping costs \citep{cariou2021ais, verschuur2023systemic}.

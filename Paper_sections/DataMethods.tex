@@ -1,0 +1,185 @@
+% DataMethods.tex — Revised: cost assumptions table moved to Appendix A
+
+\subsection{Data}
+
+\subsubsection{AIS Ship Density Raster}
+
+Our primary data source is the global ship density raster from the IMF World Seaborne Trade Monitoring System \citep{cerdeiro2020wstms}. The dataset aggregates AIS (Automatic Identification System) position reports received between January 2015 and February 2021 into a global raster grid at 0.005\textdegree{} $\times$ 0.005\textdegree{} resolution (approximately 500m $\times$ 500m at the equator). Each cell records the total number of AIS positions reported within that cell over the entire period, covering both moving and stationary vessels. The raster thus measures the \emph{intensity of shipping activity} at each location---a proxy for the cumulative traffic load experienced by each point in the global ocean.
+
+The dataset is distributed as a single GeoTIFF file (approximately 9~GB) with pre-computed overview pyramids (approximately 3~GB). Given its size, all processing uses memory-safe techniques: built-in overviews for global visualization, windowed reads for chokepoint-level extraction, and aggressive downsampling (to 3600 $\times$ 1800 pixels) for summary statistics. The AIS data underlying the raster have been validated for use in economic research; see \citet{kerbl2022ais} for a discussion of AIS data quality and applications, and \citet{cerdeiro2020nowcasting} for the IMF's methodology for constructing trade-relevant indicators from AIS.
+
+\subsubsection{Chokepoint Definitions}
+
+We define six maritime chokepoints as coarse bounding boxes in geographic coordinates (Table~\ref{tab:chokepoint_definitions}). Each bounding box encloses the navigable channel and approach lanes of a major maritime bottleneck. The six chokepoints are:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Suez Canal} --- connecting the Mediterranean and Red Sea;
+  \item \textbf{Bab el-Mandeb} --- southern entrance to the Red Sea;
+  \item \textbf{Strait of Malacca} --- connecting the Indian Ocean and South China Sea;
+  \item \textbf{Panama Canal} --- connecting the Atlantic and Pacific Oceans;
+  \item \textbf{Bosporus} --- connecting the Black Sea and Mediterranean;
+  \item \textbf{Strait of Gibraltar} --- entrance to the Mediterranean from the Atlantic.
+\end{enumerate}
+
+These chokepoints were selected based on their prominence in the maritime security literature \citep{verschuur2023systemic, bueger2024securing} and their role as physical bottlenecks that concentrate traffic and create vulnerability. The Strait of Hormuz, the Cape of Good Hope, and the Danish Straits are included in the network as waypoint nodes but are not classified as chokepoints for the closure analysis.\footnote{The Strait of Hormuz functions as a critical but open passage without the canal-like physical constraints of Suez or Panama; the Cape of Good Hope is an open-ocean alternative route; and the Danish Straits do not constitute a narrow mandatory-passage bottleneck for modern shipping.}
+
+\begin{table}[H]
+\centering
+\caption{Chokepoint Bounding Box Definitions}
+\label{tab:chokepoint_definitions}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Chokepoint & Lon Min & Lon Max & Lat Min & Lat Max \\
+\midrule
+Suez Canal        & 32.20 & 32.65 & 29.80 & 31.30 \\
+Bab el-Mandeb     & 42.25 & 43.55 & 12.15 & 13.25 \\
+Strait of Malacca & 99.00 & 104.80 & 1.00 & 6.50 \\
+Panama Canal      & $-$80.20 & $-$79.40 & 8.70 & 9.60 \\
+Bosporus          & 28.90 & 29.30 & 41.05 & 41.25 \\
+Gibraltar         & $-$6.20 & $-$5.20 & 35.80 & 36.30 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:bbox_example} illustrates the bounding box extraction procedure using the Suez Canal as an example. The full set of bounding boxes is shown in Appendix~\ref{sec:appendix_bboxes}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{Figures/generated/bounding_box_example.png}
+\caption{AIS ship density at the Suez Canal with the chokepoint bounding box overlaid (dashed cyan). The heatmap shows log-transformed AIS position counts; brighter areas indicate higher traffic intensity.}
+\label{fig:bbox_example}
+\end{figure}
+
+\subsection{Methods}
+
+\subsubsection{Empirical Strategy}
+
+The central challenge in quantifying maritime security as a global public good is that the most policy-relevant outcomes---trade reliability, routing resilience, and avoided trade-cost spikes---are \emph{equilibrium objects} of a transportation network \citep{fajgelbaum2020optimal}. When a chokepoint is disrupted, global shipments reroute endogenously. Any credible evaluation must therefore model \emph{trade-flow substitution across routes} rather than treat observed routes as fixed.
+
+Following the transportation networks framework \citep{allen2022welfare, fajgelbaum2020optimal}, we build a quantitative spatial model of global maritime shipping on a graph in which: (i)~shipments choose routes through the network; (ii)~link-level costs depend on distance, traffic (congestion), and link quality; and (iii)~counterfactuals are conducted by shocking bottleneck links and recomputing equilibrium flows and delivered trade costs. Security provision is introduced as a cost-reducing shifter on bottleneck-adjacent edges: higher security lowers effective iceberg trade costs and improves reliability \citep{besley2015welfare, bueger2024securing}.
+
+\subsubsection{Network Construction}
+
+We represent the global maritime system as an undirected weighted graph $G = (\mathcal{J}, \mathcal{E})$ with 78 nodes and approximately 155 edges:
+
+\begin{itemize}[nosep]
+  \item \textbf{Port nodes} (56): Major container and bulk ports worldwide, placed at real-world geographic coordinates.
+  \item \textbf{Chokepoint nodes} (6): The six maritime bottlenecks defined above, placed at the center of their respective bounding boxes.
+  \item \textbf{Waypoint nodes} (16): Open-ocean routing waypoints---including the Strait of Hormuz, North Pacific, North Atlantic, Central Pacific, Caribbean Sea, Arabian Sea, Bay of Bengal, South China Sea, East Mediterranean, Norwegian Sea, Cape of Good Hope, Lombok Strait, Aden Junction, Mozambique Channel, West Africa, and South Atlantic---that ensure realistic path geometry through intermediate waters.
+  \item \textbf{Edges} $\mathcal{E}$ ($\sim$155): Feasible maritime connections following known shipping corridors, with costs proportional to great-circle distances and optional multipliers for overland bypass routes.
+\end{itemize}
+
+A critical design feature is the \emph{bypass-dependent topology}: Black Sea ports connect primarily through the Bosporus, with an overland bypass via southeastern European rail/road corridors (Constanta--Piraeus) at approximately 5 times normal cost. This ensures that Bosporus closure produces large but finite rerouting costs. Indian Ocean--Pacific traffic must transit through either the Strait of Malacca or the Lombok Strait alternative, consistent with real-world shipping patterns \citep{verschuur2023systemic}. The 56 ports generate $\binom{56}{2} = 1{,}540$ unique origin-destination pairs.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/generated/network_world_map.png}
+\caption{Maritime transport network: 78 nodes (56 ports, 6 chokepoints, 16 waypoints) connected by approximately 155 edges. Red diamonds mark chokepoints; blue circles mark ports; gray squares mark ocean waypoints. Dashed brown lines indicate overland bypass routes with elevated cost multipliers.}
+\label{fig:network_map}
+\end{figure}
+
+\subsubsection{Edge Cost Specification}
+
+Let $t_e \geq 1$ denote the generalized cost of traversing edge $e$. Inspired by congestion-based network models \citep{allen2022welfare, hierons2024spreading}, we parameterize:
+\begin{equation}
+  t_e = \bar{t}_e \cdot \left(\Xi_e\right)^{\lambda},
+  \label{eq:congestion}
+\end{equation}
+where $\Xi_e$ is a traffic proxy on edge $e$ (derived from AIS density at the adjacent chokepoint) and $\lambda \geq 0$ captures congestion. The baseline component depends on great-circle distance:
+\begin{equation}
+  \bar{t}_e = \text{dist}_e \cdot m_e,
+  \label{eq:baseline_cost}
+\end{equation}
+where $m_e$ is an edge-specific multiplier capturing physical constraints and security conditions.
+
+\paragraph{Security as a cost shifter.} We model security provision as a reduction in the effective cost multiplier on bottleneck-adjacent edges:
+\begin{equation}
+  m_e = m_e^{\text{base}} \cdot (1 + \delta_{\text{risk}} \cdot \text{Risk}_e) \cdot (1 - \delta_{\text{sec}} \cdot S_e),
+  \label{eq:security_cost}
+\end{equation}
+where $\text{Risk}_e$ is a risk indicator, $S_e$ is security intensity, and $\delta_{\text{risk}}, \delta_{\text{sec}} > 0$ govern the sensitivity of costs to risk and security. This formulation follows \citet{besley2015welfare} in treating insecurity as a trade-cost shifter. In the absence of direct naval presence data, we treat the security parameters as sensitivity analysis inputs. The full set of cost and distance assumptions is documented in Appendix~\ref{sec:appendix_cost}.
+
+Figure~\ref{fig:edge_cost} illustrates the edge cost structure along the Suez--Red Sea corridor.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{Figures/generated/edge_cost_diagram.png}
+\caption{Edge cost illustration: Suez--Red Sea corridor. Numbers on edges show great-circle distances (km). The cost formula $t_e = \text{dist}_e \times m_e \times \Xi_e^{\lambda}$ scales these distances by congestion and security multipliers.}
+\label{fig:edge_cost}
+\end{figure}
+
+Figure~\ref{fig:security_shifter} compares the network under baseline conditions and under a risk premium scenario.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/generated/security_shifter_comparison.png}
+\caption{Security cost shifter: baseline (left) versus risk premium scenario (right). The risk premium doubles the effective cost of edges adjacent to Bab el-Mandeb, increasing the cost of transiting the Red Sea corridor.}
+\label{fig:security_shifter}
+\end{figure}
+
+\subsubsection{Congestion Calibration from AIS Density}
+
+We calibrate the congestion proxy $\Xi_e$ using the AIS density data. For each chokepoint $b$, we extract the total AIS position count within the bounding box and compute:
+\begin{equation}
+  \Xi_b = \sum_{c \in \text{BBox}(b)} \text{density}_c,
+\end{equation}
+where the sum is over all raster cells $c$ within the bounding box of chokepoint $b$. We then normalize to a $[1, 1.5]$ multiplier range using log-scaling:
+\begin{equation}
+  m_b^{\text{congestion}} = 1 + 0.5 \cdot \frac{\ln(1 + \Xi_b) - \min_b \ln(1 + \Xi_b)}{\max_b \ln(1 + \Xi_b) - \min_b \ln(1 + \Xi_b)}.
+\end{equation}
+This produces a mild congestion penalty (up to 50\%) for the most heavily trafficked chokepoints, consistent with empirical estimates of congestion costs \citep{notteboom2006impact, du2020port}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/generated/congestion_calibration.png}
+\caption{Congestion calibration. Left: total AIS intensity (log scale) by chokepoint. Right: mapping from AIS intensity to the congestion multiplier $m_b^{\text{congestion}} \in [1, 1.5]$.}
+\label{fig:congestion_calibration}
+\end{figure}
+
+\subsubsection{Route Choice and OD Trade Costs}
+
+For each origin port $o$ and destination port $d$, the baseline trade cost is the shortest weighted path through the network:
+\begin{equation}
+  \tau_{od} = \min_{r \in \mathcal{R}_{od}} \sum_{e \in r} t_e,
+  \label{eq:shortest_path}
+\end{equation}
+where $\mathcal{R}_{od}$ is the set of feasible routes from $o$ to $d$. This corresponds to the $\theta \to \infty$ limit of the log-sum aggregator used in probabilistic route-choice models \citep{fajgelbaum2020optimal}. We use the Dijkstra shortest-path algorithm to solve (\ref{eq:shortest_path}) for all 1,540 port pairs.
+
+Figure~\ref{fig:route_choice} illustrates the route-choice mechanism by comparing the baseline optimal route from Shanghai to Rotterdam with the rerouted path under Suez Canal closure.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/generated/route_choice_before_after.png}
+\caption{Route choice: Shanghai to Rotterdam. Left: baseline route via Malacca--Suez corridor. Right: rerouted path via North Pacific--Panama--North Atlantic after Suez Canal closure.}
+\label{fig:route_choice}
+\end{figure}
+
+\subsubsection{Scenario Design: Chokepoint Stress Tests}
+
+We implement three classes of scenarios, illustrated using the Suez Canal as a worked example (Figure~\ref{fig:suez_scenarios}):
+
+\paragraph{Scenario 1: Full closure.} For each chokepoint $b$, we remove it from the graph and recompute shortest paths for all 1,540 port pairs. The delta cost $\Delta \tau_{od}^{(b)} = \tau_{od}^{\text{shocked}} - \tau_{od}^{\text{baseline}}$ measures the rerouting penalty.
+
+\paragraph{Scenario 2: Partial capacity degradation.} We increase the cost multiplier on chokepoint-adjacent edges by a factor $\alpha > 1$:
+\begin{equation}
+  t_e^{\text{shocked}} = \alpha \cdot t_e^{\text{baseline}}, \quad e \in \mathcal{E}(b),
+\end{equation}
+varying $\alpha \in \{1.25, 1.5, 2.0, 3.0, 5.0, 8.0, 10.0\}$ to trace a severity curve for each chokepoint.
+
+\paragraph{Scenario 3: Security risk premium.} We add a risk premium to a specific chokepoint's edges:
+\begin{equation}
+  m_e^{\text{risk}} = m_e^{\text{base}} \cdot (1 + \delta_{\text{risk}}),
+\end{equation}
+where $\delta_{\text{risk}} \in \{0.10, 0.20, 0.50, 1.00, 2.00\}$ represents an exogenous increase in risk.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Figures/generated/suez_scenario_3panel.png}
+\caption{Suez Canal: three disruption scenarios. Left: full closure. Center: partial degradation ($\alpha = 3$). Right: risk premium ($+100\%$). These three classes of stress tests are applied to all six chokepoints.}
+\label{fig:suez_scenarios}
+\end{figure}
+
+\subsubsection{Output Metrics}
+
+For each scenario, we report: (i)~delta cost $\Delta \tau_{od}$ for all 1,540 port pairs, in absolute (km-equivalent) and percentage terms; (ii)~mean delta cost as a summary vulnerability index; (iii)~fraction of port pairs whose optimal route changes; and (iv)~per-port vulnerability, the mean cost increase across all of a port's trade routes when a given chokepoint is disrupted.
